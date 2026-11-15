@@ -82,6 +82,9 @@ Speech services and externally loaded fonts can need a network connection. Full 
 Safety wording in the original project is an intention, not proof that all clinical edge cases behave safely.
 See testing and limitations.
 
+Prototype disclaimer: Sensor readings, Earth communications, SOS dispatch, and crew alerts are simulated. No real wearable or mission-control connection is implemented. This is not a medical device.
+
+
 Team
 NOVARAIA-X
 
