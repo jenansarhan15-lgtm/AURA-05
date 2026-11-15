@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}{{ _('Breathing session || جلسة تنفس') }}{% endblock %}
+{% block body %}
+<div class="card" style="text-align:center;max-width:640px;margin:auto">
+  <div class="eyebrow">CALMING · 3 MIN</div><h1>{{ _('Breathing session || جلسة تنفس') }}</h1>
+  <p class="muted">{{ _('Breathe in for 4 seconds, out for 6. Follow the circle. || شهيق 4 ثوانٍ، زفير 6 ثوانٍ. تنفّس مع الدائرة.') }}</p>
+  <div class="breath" id="b">{{ _('Ready || استعد') }}</div>
+  <div class="big" id="left">3:00</div>
+  <div class="row" style="justify-content:center;margin-top:14px">
+    <button class="btn" id="start">{{ _('Start || ابدأ') }}</button>
+    <form method="post" action="/calm/done"><input type="hidden" name="back" value="{{ back }}"><button class="btn ghost">{{ _('Done, go back || انتهيت · رجوع') }}</button></form>
+  </div>
+  <p class="src" style="margin-top:12px">{{ _('Calming and regular breathing: IFRC 2020 (Psychological first aid, Breathing difficulties). The 4/6 rhythm is a prototype choice. || تقنيات التهدئة والتنفس المنتظم: IFRC 2020. الإيقاع 4/6 اختيار النموذج الأولي.') }}</p>
+</div>
+{% endblock %}
+{% block scripts %}<script>
+const W = {{ _({'in': 'Breathe in || شهيق', 'out': 'Breathe out || زفير', 'done': 'Well done || أحسنت'})|tojson }}, b = document.getElementById("b"), left = document.getElementById("left");
+let end = 0, timer;
+document.getElementById("start").onclick = () => { end = Date.now() + 180000; phase(true); clearInterval(timer); timer = setInterval(() => { const l = Math.max(0, Math.ceil((end - Date.now()) / 1000)); left.textContent = Math.floor(l / 60) + ":" + String(l % 60).padStart(2, "0"); }, 250); };
+function phase(inh) { if (Date.now() > end) { b.textContent = W.done; b.style.transform = "scale(1)"; Voice.speak(W.done); return; }
+  b.style.transitionDuration = inh ? "4s" : "6s"; b.style.transform = inh ? "scale(1.25)" : "scale(.8)"; b.textContent = inh ? W.in : W.out; setTimeout(() => phase(!inh), inh ? 4000 : 6000); }
+</script>{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}{% block title %}{{ _('Silent Hour || الساعة الصامتة') }}{% endblock %}
+{% block body %}
+{% set p = s.packet %}{% set replied = log|selectattr('kind', 'equalto', 'reply')|list|length > 0 %}
+{% set mm = (comm.one_way_s // 60)|int %}{% set ow = (mm ~ ' min' if comm.one_way_s >= 60 else comm.one_way_s ~ ' s') %}
+<div class="stack">
+  <div class="band RED">
+    <div class="dot" aria-hidden="true"></div>
+    <div style="flex:1;min-width:240px"><div class="eyebrow">SILENT HOUR · {{ p.crew_id }} · D{{ p.mission_day }} · {{ _(comm.name) }}</div>
+      <h1>{{ _('The SOS summary was sent to Earth automatically || أُرسل ملخص SOS للأرض تلقائياً') }}</h1>
+      <p>{{ _('You are not alone. You do not need to read: the system tells you what to do, step by step, until the reply arrives. || أنت لست وحدك. لا تحتاج أن تقرأ: النظام يقول لك ماذا تفعل خطوة بخطوة حتى يصل الرد.') }}</p></div>
+    <span class="tag SIM">{{ _('SIMULATION · NOTHING WAS SENT || محاكاة · لم يُرسَل شيء') }}</span>
+  </div>
+
+  <section class="card guide" id="guide">
+    <div class="row between"><span class="tag IFRC">{{ _('VOICE GUIDE · STEP || الإرشاد الصوتي · خطوة') }} <span id="gN">1</span>/{{ steps|length }}</span><span class="small muted" id="gState"></span></div>
+    <div class="stepnow" id="gText">{{ _('Press Start and I will say each step aloud. || اضغط «ابدأ» وسأقول لك كل خطوة بصوت مسموع.') }}</div>
+    <div class="row" style="justify-content:center">
+      <button type="button" class="btn big red" id="gStart">{{ _('Start the voice guide || ابدأ الإرشاد الصوتي') }}</button>
+      <button type="button" class="btn big" id="gDone" hidden>{{ _('Done || تم') }}</button>
+      <button type="button" class="btn ghost" id="gRepeat" hidden>{{ _('Repeat the step || أعد الخطوة') }}</button>
+    </div>
+    <p class="src" style="margin-top:8px">{{ _('Say "done" after the step, or "repeat" to hear it again, or use the buttons. || قل «تم» بعد تنفيذ الخطوة، أو «أعد» لسماعها مرة ثانية، أو استخدم الأزرار.') }}</p>
+  </section>
+
+  <div class="grid g-main" style="align-items:start">
+    <div class="stack">
+      <section class="card" style="text-align:center">
+        <div class="eyebrow" id="cdLabel">{{ _('EARLIEST LIKELY REPLY FROM EARTH IN || أقرب رد محتمل من الأرض بعد') }}</div>
+        <div class="count" id="count">--:--</div>
+        <div class="timeline" style="margin-top:12px;text-align:start">
+          <div class="tl" id="tl1"><b>1 · {{ _('Signal travelling to Earth || الإشارة ذاهبة إلى الأرض') }}</b><div class="small muted">{{ _('Outbound || الذهاب') }}: <span class="num">{{ ow }}</span></div></div>
+          <div class="tl" id="tl2"><b>2 · {{ _('Medical team reviewing || الفريق الطبي يراجع') }}</b><div class="small muted">{{ _('Assumed || افتراض') }}: <span class="num">{{ R.ground_review_min }} min</span></div></div>
+          <div class="tl" id="tl3"><b>3 · {{ _('Reply travelling back || الرد عائد إليك') }}</b><div class="small muted">{{ _('Return || الإياب') }}: <span class="num">{{ ow }}</span></div></div>
+        </div>
+        <div id="reply" class="note" style="margin-top:12px;text-align:start;border-color:var(--green)" {{ '' if replied else 'hidden' }}><b class="c-GREEN">{{ _('Reply from Earth (simulated): || رد الأرض (محاكاة):') }}</b> {{ _('We received the summary and the readings. Continue the steps and the monitoring every 5 minutes. The flight surgeon will send the next instructions. || استلمنا الملخص والقياسات. استمروا بالخطوات والمراقبة كل 5 دقائق. طبيب الرحلة سيرسل التعليمات التالية.') }}</div>
+        <form method="post" action="/silent/{{ s.id }}/speed" class="row noprint" style="justify-content:center;margin-top:12px">
+          <select name="loc" style="width:auto" aria-label="{{ _('Distance from Earth || البعد عن الأرض') }}" onchange="this.form.submit()">{% for k, c in COMMS.items() %}<option value="{{ k }}" {{ 'selected' if k == s.location }}>{{ _(c.name) }}</option>{% endfor %}</select>
+          <select name="speed" style="width:auto" aria-label="{{ _('Demo speed || سرعة العرض') }}" onchange="this.form.submit()">{% for v, l in [(1,'Real time || وقت حقيقي'),(60,'Demo speed x60 || تسريع ×60'),(600,'Demo speed x600 || تسريع ×600')] %}<option value="{{ v }}" {{ 'selected' if v == s.speed }}>{{ _(l) }}</option>{% endfor %}</select>
+        </form>
+        <p class="src" style="margin-top:8px">{{ _(comm.src) }}. {{ _('The ground review time is a prototype assumption: published estimates range from 45 minutes to several hours. || زمن مراجعة الفريق الأرضي افتراض للنموذج الأولي: التقديرات المنشورة من 45 دقيقة إلى عدة ساعات.') }}</p>
+      </section>
+
+      <section class="card">
+        <div class="head"><h2>{{ _('Steps now || الخطوات الآن') }}</h2><span class="small muted">{{ _('Press a row when the step is done || اضغط على السطر عند تنفيذ الخطوة') }}</span></div>
+        <div class="stack" style="gap:8px">{% for st in steps %}
+          <label class="steprow {{ 'done' if st.done }}"><input type="checkbox" class="stepbox" data-t="{{ st.t }}" {{ 'checked' if st.done }}><span class="box" aria-hidden="true">&#10003;</span><span style="flex:1"><b class="num">{{ loop.index }}.</b> {{ _(st.t) }}<span class="src" style="display:block">{{ st.src }}</span></span></label>{% endfor %}</div>
+        <p class="note" style="margin-top:10px">{{ _('IFRC 2020 guidance is written for Earth and needs flight-surgeon adaptation. No medication without the flight surgeon. || إرشادات IFRC 2020 أرضية وتحتاج تكييف طبيب الرحلة. لا دواء إلا بتعليمات الطبيب الأرضي.') }}</p>
+      </section>
+
+      <section class="card">
+        <div class="head"><div><div class="eyebrow">AUTOMATIC RE-MEASURE</div><h2>{{ _('Re-measure every 5 minutes, automatically || إعادة القياس كل 5 دقائق، تلقائياً') }}</h2></div><span class="tag AUTO">{{ _('NEXT IN || القادم بعد') }} <span id="next">--:--</span></span></div>
+        <p class="muted">{{ _('The suit, the smart shirt and the watch take the readings by themselves and add them to the log and to the summary for Earth. Nothing to press. || البدلة والقميص الذكي والساعة تأخذ القياسات لوحدها وتضيفها للسجل وللملخص المرسل للأرض. لا شيء تضغطه.') }} <span class="tag SIM">SIM</span></p>
+        <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--teal-ink)">{{ _('Manual entry (backup, prototype only) || إدخال يدوي (احتياط، للنموذج الأولي فقط)') }}</summary>
+          <div class="grid g3" style="margin-top:10px">{% for k in VITALS %}<div class="field"><label class="small" for="m{{ k }}">{{ _(VLABEL[k]) }}</label><input id="m{{ k }}" class="mv" data-k="{{ k }}" type="number" step="0.1" placeholder="{{ '%g' % p.vitals[k] }}"></div>{% endfor %}</div>
+          <div class="row" style="margin-top:10px"><button class="btn ghost" id="manBtn" type="button">{{ _('Record manual values || سجّل القيم اليدوية') }}</button><button class="btn ghost" id="simBtn" type="button">{{ _('Take a sensor reading now || خذ قراءة من الحسّاس الآن') }}</button></div></details>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="card">
+        <div class="head"><h2>{{ _('Log || السجل') }}</h2><span class="small muted">{{ _('Everything is saved with its time || كل شيء يُحفظ بالوقت') }}</span></div>
+        <div class="loglist" id="log">{% for l in log %}<div><span class="num muted">{{ l.ts|clock }}</span> · {{ _(l.text) }}</div>{% endfor %}</div>
+        <div class="row noprint" style="margin-top:10px"><input type="text" id="noteTxt" aria-label="{{ _('Add a note || أضف ملاحظة') }}" placeholder="{{ _('Add a note to the log || أضف ملاحظة للسجل') }}" style="flex:1"><button class="btn sm" id="noteBtn" type="button">{{ _('Add || أضف') }}</button></div>
+      </section>
+      <section class="card">
+        <div class="head"><h2>{{ _('SOS summary || ملخص SOS') }}</h2><span class="tag SIM">{{ _('NOT SENT || لم يُرسَل') }}</span></div>
+        <p class="small muted">{{ _('What the flight surgeon would receive: symptoms, vital signs, the personal baseline, and the sleep and stress context. || ما كان سيصل للطبيب الأرضي: الأعراض، القياسات، الطبيعة الشخصية، وسياق النوم والتوتر.') }}</p>
+        <pre style="margin-top:8px">{{ packet_json }}</pre>
+        <div class="row noprint" style="margin-top:10px"><a class="btn" href="/silent/{{ s.id }}/summary.txt">{{ _('Download summary with log || تنزيل الملخص مع السجل') }}</a></div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}{% set replied = log|selectattr('kind', 'equalto', 'reply')|list|length > 0 %}
+<script>
+const T = {{ timing|tojson }}, SID = {{ s.id }}, STEPS = {{ _(steps|map(attribute='t')|list)|tojson }}, VW = {{ VOICE|tojson }}; let replied = {{ 'true' if replied else 'false' }};
+const X = {{ _({'arrived': 'REPLY FROM EARTH ARRIVED (SIMULATED) || وصل رد الأرض (محاكاة)', 'reply': 'Reply from Earth arrived (simulated) || وصل رد الأرض (محاكاة)', 'did': 'Step done: || نُفّذت الخطوة:', 'undid': 'Step unmarked: || أُلغي تعليم الخطوة:',
+ 'reading': 'Reading the step… || أقرأ الخطوة…', 'listen': 'Listening: say done or repeat || أسمعك: قل «تم» أو «أعد»', 'press': 'Press Done after the step || اضغط «تم» بعد التنفيذ', 'step': 'Step || الخطوة', 'saydone': 'Say done when you finish. || قل تم عندما تنتهي.',
+ 'intro': 'I sent the summary to Earth. I am with you. I will tell you what to do, step by step. || أرسلت الملخص إلى الأرض. أنا معك. سأقول لك ماذا تفعل خطوة بخطوة.',
+ 'end': 'Well done. All steps are complete. Keep watching. The readings are taken automatically every five minutes. You are not alone. || أحسنت. نفذت كل الخطوات. استمر بالمراقبة. القياسات تؤخذ تلقائياً كل خمس دقائق. أنت لست وحدك.', 'ended': 'Steps complete || انتهت الخطوات',
+ 'auto': 'Automatic reading taken and added to the summary. || أُخذت قراءة تلقائية وأُضيفت للملخص.'})|tojson }};
+const loaded = Date.now(), $ = id => document.getElementById(id);
+const fmt = sec => { sec = Math.max(0, Math.ceil(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (h ? h + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0"); };
+function addLog(ts, text) { const d = document.createElement("div"); d.innerHTML = `<span class="num muted">${ts}</span> · `; d.append(text); $("log").append(d); $("log").scrollTop = 1e6; }
+async function post(url, body) { const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); return r.json(); }
+const simNow = () => ((T.now - T.started) + (Date.now() - loaded) / 1000) * T.speed;       // simulated seconds since the SOS
+let lastAuto = Math.floor(simNow() / T.remeasure);
+function tick() {
+  const sim = simNow(), t1 = T.one_way, t2 = t1 + T.review, t3 = t2 + T.one_way;          // arrives, reviewed, reply arrives
+  $("count").textContent = fmt(t3 - sim);
+  $("tl1").className = "tl " + (sim >= t1 ? "done" : "on"); $("tl2").className = "tl " + (sim >= t2 ? "done" : sim >= t1 ? "on" : ""); $("tl3").className = "tl " + (sim >= t3 ? "done" : sim >= t2 ? "on" : "");
+  $("next").textContent = fmt(T.remeasure - sim % T.remeasure);
+  const k = Math.floor(sim / T.remeasure);
+  if (k > lastAuto) { lastAuto = k; post(`/api/silent/${SID}/measure`, {}).then(r => { addLog(r.ts, r.text); if (gi >= STEPS.length) Voice.speak(X.auto); }); }   // automatic reading
+  if (sim >= t3) { $("cdLabel").textContent = X.arrived; if (!replied) { replied = true; $("reply").hidden = false; post(`/api/silent/${SID}/log`, { kind: "reply", text: {{ 'Reply from Earth arrived (simulated) || وصل رد الأرض (محاكاة)'|tojson }} }).then(r => addLog(r.ts, X.reply)); Voice.speak(X.reply); } }
+  setTimeout(tick, 250);
+}
+document.querySelectorAll(".stepbox").forEach((b, i) => b.onchange = async () => { b.closest(".steprow").classList.toggle("done", b.checked);
+  const r = await post(`/api/silent/${SID}/log`, { kind: "step", text: (b.checked ? "Step done: " : "Step unmarked: ") + b.dataset.t.split(" || ")[0] + " || " + (b.checked ? "نُفّذت الخطوة: " : "أُلغي تعليم الخطوة: ") + b.dataset.t.split(" || ").pop() });
+  addLog(r.ts, (b.checked ? X.did : X.undid) + " " + STEPS[i]); });
+// ---- spoken guide: says one step, waits for "done" (voice or button), marks it, moves on ----
+let gi = -1, gL = null;
+function gSay() { $("gN").textContent = gi + 1; $("gText").textContent = STEPS[gi]; $("gState").textContent = X.reading; Voice.speak(X.step + " " + (gi + 1) + ". " + STEPS[gi] + " " + X.saydone, gListen); }
+function gListen() {
+  if (!Voice.supported || gi < 0 || gi >= STEPS.length) { $("gState").textContent = X.press; return; }
+  $("gState").textContent = X.listen;
+  gL = Voice.listen(t => { if (Voice.has(t, VW.repeat)) gSay(); else if (Voice.has(t, VW.done)) gNext(); else gListen(); }, e => { $("gState").textContent = X.press; if (e === "silence") setTimeout(gListen, 400); });
+}
+function gNext() {
+  Voice.stop(); if (gL) try { gL.abort(); } catch (e) {}
+  if (gi >= 0 && gi < STEPS.length) { const b = document.querySelectorAll(".stepbox")[gi]; if (b && !b.checked) { b.checked = true; b.onchange(); } }
+  gi++;
+  if (gi >= STEPS.length) { $("gText").textContent = X.end; $("gDone").hidden = $("gRepeat").hidden = true; $("gState").textContent = X.ended; Voice.speak(X.end); return; }
+  gSay();
+}
+$("gStart").onclick = () => { $("gStart").hidden = true; $("gDone").hidden = $("gRepeat").hidden = false; gi = -1; Voice.speak(X.intro, gNext); };
+$("gDone").onclick = gNext; $("gRepeat").onclick = () => { Voice.stop(); gSay(); };
+$("simBtn").onclick = async () => { const r = await post(`/api/silent/${SID}/measure`, {}); addLog(r.ts, r.text); };
+$("manBtn").onclick = async () => { const v = {}; document.querySelectorAll(".mv").forEach(i => { if (i.value) v[i.dataset.k] = i.value; }); if (!Object.keys(v).length) { $("mheart_rate_bpm").focus(); return; } const r = await post(`/api/silent/${SID}/measure`, v); addLog(r.ts, r.text); };
+$("noteBtn").onclick = async () => { const t = $("noteTxt").value.trim(); if (!t) return; const r = await post(`/api/silent/${SID}/log`, { kind: "note", text: t }); addLog(r.ts, t); $("noteTxt").value = ""; };
+tick();
+</script>
+{% endblock %}

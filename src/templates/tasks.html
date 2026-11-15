@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% block title %}{{ _('Tasks and readiness || المهام والجاهزية') }}{% endblock %}
+{% block body %}
+{% set BAND = {'GREEN': 'Ready || جاهز', 'YELLOW': 'Needs rest || يحتاج راحة', 'RED': 'Not available now || غير متاح الآن'} %}{% set RISK = {'high': 'High risk || خطرة', 'medium': 'Medium || متوسطة', 'low': 'Light || خفيفة'} %}
+<div class="stack">
+  <div><div class="eyebrow">CREW READINESS</div><h1>{{ _('Tasks and crew readiness || المهام وجاهزية الطاقم') }}</h1><p class="muted">{{ _('The most ready person takes the hardest task. Whoever needs rest swaps or postpones. The commander decides. || الأكثر جاهزية يأخذ المهمة الأصعب، ومن يحتاج راحة يبدّل أو يؤجّل. القرار النهائي للقائد.') }}</p></div>
+  {% if sent %}<div class="note"><b>{{ _('Done. The suggestion was recorded for the commander (simulated). || تم. سُجّل الاقتراح للقائد (محاكاة).') }}</b></div>{% endif %}
+  <div class="grid g-main" style="align-items:start">
+    <section class="card">
+      <div class="head"><h2>{{ _("Today's tasks || مهام اليوم") }}</h2><span class="tag SIM">{{ _('SAMPLE LIST || قائمة تجريبية') }}</span></div>
+      <div class="scroll"><table><tr><th>{{ _('Task || المهمة') }}</th><th>{{ _('Risk || الخطورة') }}</th><th>{{ _('Assigned || المكلَّف') }}</th><th>{{ _('Readiness || الجاهزية') }}</th><th></th></tr>
+      {% for t in tasks %}{% set r = ready[t.crew_id] %}
+      <tr><td><b>{{ _(t.title) }}</b></td><td><span class="pill {{ 'RED' if t.risk == 'high' else 'YELLOW' if t.risk == 'medium' else 'GREEN' }}">{{ _(RISK[t.risk]) }}</span></td>
+        <td class="num">{{ t.crew_id }}</td><td><span class="pill {{ r.band }}">{{ _(BAND[r.band]) }}</span></td>
+        <td>{% if t.risk == 'high' and t.crew_id == me %}<a class="btn sm" href="/game?task={{ _(t.title) }}">{{ _('Play before the task || العب قبل المهمة') }}</a>{% endif %}</td></tr>{% endfor %}</table></div>
+      {% if swaps %}<div class="eyebrow" style="margin-top:16px">SYSTEM SUGGESTIONS</div>
+      <div class="stack" style="gap:8px;margin-top:6px">{% for s in swaps %}
+        <form method="post" class="yn"><span>{{ _(s.text) }}</span><input type="hidden" name="text" value="{{ s.text }}"><button class="btn sm amber">{{ _('Send to commander || أرسل للقائد') }}</button></form>{% endfor %}</div>
+      {% else %}<p class="note" style="margin-top:14px">{{ _('All high-risk tasks are with ready people. No swap needed. || كل المهام الخطرة عند أشخاص جاهزين. لا تبديل مطلوب.') }}</p>{% endif %}
+      <p class="src" style="margin-top:10px">{{ _('Builds on the idea of NASA Playbook (the crew adjusts its own schedule). Our addition: the swap is tied to measured readiness. || مبني على فكرة NASA Playbook (الطاقم يعدّل جدوله بنفسه). إضافتنا: ربط التبديل بالجاهزية المقيسة.') }}</p>
+    </section>
+    <section class="card">
+      <div class="head"><h2>{{ _('Readiness ranking today || ترتيب الجاهزية اليوم') }}</h2><span class="tag">{{ _('CONFIDENTIAL || سرّي') }}</span></div>
+      <ul class="clean">{% for cid, r in order %}
+        <li class="tile"><div class="row between"><b><span class="num">{{ loop.index }}. {{ cid }}</span> · {{ _(r.role) }}</b><span class="pill {{ r.band }}">{{ _(BAND[r.band]) }}</span></div>
+          {% if cid == me %}<div class="small muted">{{ _('You || أنت') }}: <span class="num">{{ r.score }}/100</span>{% if r.why %} · {{ _(r.why)|join(_(', || ، ')) }}{% endif %}</div>
+          {% else %}<div class="small muted">{{ _('Reasons hidden: visible to the person only || الأسباب مخفية: يراها صاحبها فقط') }}</div>{% endif %}</li>{% endfor %}</ul>
+      <p class="note" style="margin-top:10px"><b>{{ _('Privacy: || الخصوصية:') }}</b> {{ _('crewmates see the status only. Health and psychological details are visible to the person and the flight surgeon only. || الزملاء يرون الحالة فقط. التفاصيل الصحية والنفسية لا تظهر إلا لصاحبها وللطبيب الأرضي.') }}</p>
+      <p class="src" style="margin-top:6px">{{ _('Readiness = 100 minus deductions for sleep, stress and focus drop, capped when the status is yellow or red. First weights, in engines/readiness.py. || الجاهزية = 100 ناقص خصومات النوم والتوتر وهبوط التركيز، مع سقف عند الحالة الصفراء أو الحمراء. أوزان أولية في engines/readiness.py.') }}</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

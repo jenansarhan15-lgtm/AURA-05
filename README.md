@@ -1,170 +1,120 @@
-# AURA-05 — The Fifth Crew Member
+# AURA-5 — The fifth crew member
 
-**NOVARAIA-X | NASA Space Apps Challenge 2026**
+**NOVARAIA-X · NASA Space Apps 2026 prototype**
 
-**Challenge:** Create Health Monitoring Software for Astronauts on Space Missions
+Challenge: **Create Health Monitoring Software for Astronauts on Space Missions**
 
-## Project Overview
+AURA-5 is a bilingual astronaut-health support prototype combining synthetic vital signs, personal baselines, symptom checklists, sleep and psychological-support prompts, and a browser attention task. It helps demonstrate structured observations and follow-up while communication with Earth is delayed.
 
-AURA-05 is a bilingual astronaut-health support prototype designed to demonstrate how structured health observations, personal baselines, symptom checklists, sleep monitoring, and psychological-support prompts can assist crew members during long-duration space missions.
+**Not a medical device, diagnosis system, or emergency service. Do not enter real personal or health information. No NASA approval or endorsement is claimed.**
 
-The system combines synthetic vital-sign measurements, personal health baselines, rule-based risk indicators, and follow-up workflows in one interface. It also includes a browser-based attention task and a simulated communication-delay mode.
+![Actual AURA-5 dashboard, cropped from the running prototype](screenshots/overview.jpg)
 
-AURA-05 explores how astronauts could organize health observations and follow-up activities when communication with Earth is delayed.
+## Links
 
-> **Important Disclaimer:** AURA-05 is a research and demonstration prototype. It is not a medical device, diagnostic system, or emergency service. It does not provide professional medical advice. All demonstration health measurements are synthetic. Do not enter real personal or health information. No NASA approval or endorsement is claimed.
+- Live application: https://aegis-mind.replit.app/aura5/
+- Official challenge: https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/
+- Project demo: the team must upload its presentation PDF to a publicly accessible host and add the resulting link here. No hosted demo link has been supplied.
+- Repository: this folder is prepared for upload; no GitHub repository has been created or published as part of this package.
 
-## Live Application
+The live app is an existing hosted build and may differ from this standalone packaging copy.
 
-**[Launch AURA-05](https://aegis-mind.replit.app/aura5/)**
+## The problem
 
-**[GitHub Repository](https://github.com/jenansarhan15-lgtm/AURA-05)**
+Isolation, disrupted sleep, workload, and delayed communication make health observation and follow-up important on space missions. Mars messages may take approximately 4–24 minutes each way. AURA-5 explores a readable, crew-facing workflow, without claiming to solve autonomous space medicine.
 
-**Project Demo:** The presentation or demonstration link will be added here once publicly hosted.
+## What works in this prototype
 
-## The Problem
+- Overview of six displayed vital measurements, synthetic records and manual entries.
+- Four synthetic crew members across 180 mission days; personal baselines from the first 14 days.
+- Morning and evening check-ins, sleep/stress support and trend flags.
+- Schematic body selection, symptom questions and explained rule-based urgency categories.
+- Re-measurement workflows and first-aid information.
+- A browser reaction-time task inspired by PVT-B research; not a validated PVT-B implementation.
+- Crew-readiness and task-swap suggestions, plus a tomorrow plan.
+- Silent Hour: simulated communication delay, action logging and text-summary export.
+- English and Arabic interfaces; browser-dependent speech recognition and synthesis.
 
-Astronauts on long-duration missions may experience isolation, disrupted sleep, workload-related stress, and delays in communication with Earth.
+## Try a demonstration
 
-Communication delays during Mars missions can make timely health observation and follow-up more challenging.
+1. Open the overview and select a synthetic crew member and mission day.
+2. Inspect the source labels and baseline comparison.
+3. Complete a morning or evening check-in using fictional values only.
+4. Select **I have a symptom**, choose a body region and answer the danger-sign questions.
+5. Review the explained urgency result and follow-up options.
+6. Open Silent Hour to simulate a delay and export a summary.
 
-AURA-05 explores a crew-facing workflow for organizing health information, identifying unusual patterns, and supporting structured follow-up without claiming to replace medical professionals or autonomous mission medical systems.
+Labels matter: **SIM** means synthetic measurements; **MANUAL** means entered by a user; **REAL** refers to an actually played browser attention session, not an astronaut sensor feed.
 
-## Key Features
+## Run locally
 
-- **Health Dashboard:** Displays six vital measurements with synthetic records and manual entries.
-- **Personal Baselines:** Demonstrates baseline comparisons using four synthetic crew profiles across 180 mission days, with baselines derived from the first 14 days.
-- **Daily Check-ins:** Morning and evening check-ins covering health, sleep, and stress.
-- **Symptom Assessment:** Body-region selection, symptom questions, and rule-based urgency categories with explanations.
-- **Follow-up Workflows:** Re-measurement guidance and first-aid reference information.
-- **Attention Task:** A browser-based reaction-time task inspired by PVT-B research. It is not a validated PVT-B implementation.
-- **Crew Readiness:** Demonstration of crew-readiness indicators, task-swap suggestions, and a next-day plan.
-- **Silent Hour:** Simulates communication delays, records actions, and supports text-summary export.
-- **Bilingual Interface:** English and Arabic interfaces, with browser-dependent speech recognition and speech synthesis.
+Requires **Python 3.11+**.
 
-## How to Try the Prototype
-
-1. Open the live application.
-2. Select a synthetic crew member and mission day.
-3. Review the displayed measurements and personal-baseline comparisons.
-4. Complete a morning or evening check-in using fictional values.
-5. Select **I have a symptom**, choose a body region, and answer the symptom questions.
-6. Review the explained urgency category and follow-up options.
-7. Open **Silent Hour** to explore the simulated communication-delay workflow and export a summary.
-
-### Data Labels
-
-- **SIM:** Synthetic measurements.
-- **MANUAL:** Values entered manually by the user.
-- **REAL:** An actual browser attention-task session, not a real astronaut sensor measurement.
-
-## Technology Stack
-
-- Python
-- Flask
-- Jinja Templates
-- SQLite
-- HTML and CSS
-- Vanilla JavaScript
-
-## AI and Decision Methodology
-
-AURA-05 uses explicit rules, personal-baseline comparisons, and structured decision logic to demonstrate health-monitoring workflows.
-
-It does not use a trained neural network or an LLM as a clinical decision-maker. No trained model weights or model-accuracy claims are provided.
-
-Replit Agent assisted with submission text, presentation copy, and repository packaging. The team should disclose any additional AI assistance used in the application, logo, images, or other project assets according to the competition's requirements.
-
-For further details, see [AI Methodology](docs/AI_METHODOLOGY.md).
-
-## NASA Resources and Research
-
-NASA publications inform the prototype's design considerations, particularly communication latency, sleep and workload risks, and isolation-support needs.
-
-No real astronaut health dataset is imported. All demonstration health measurements are synthetic.
-
-The CSA Bio-Monitor is mentioned as a future wearable reference, not as a connected device.
-
-For further details:
-
-- [NASA and Research Sources](docs/NASA_DATA_SOURCES.md)
-- [Dataset Notes](data/README.md)
-- [Third-Party Notices](THIRD_PARTY_NOTICES.md)
-
-## System Limitations
-
-- No connected wearable or live astronaut sensor feed.
-- No automatic SOS dispatch or real crew notification.
-- No real mission-control communication.
-- Communication-delay behavior is simulated.
-- Some interface messages represent simulated notifications only.
-- Medical thresholds and reference content require qualified professional review.
-- NEWS2-derived bands do not establish full NEWS2 compliance.
-- The prototype does not claim production-level security, access control, or privacy assurance.
-- Browser speech services and external fonts may require an internet connection.
-- Full offline operation is not guaranteed.
-
-See [Testing and Limitations](docs/TESTING_AND_LIMITATIONS.md).
-
-## Running Locally
-
-**Requirements:** Python 3.11 or later.
-
-```bash
+```sh
 python -m pip install -r requirements.txt
 python src/main.py
 ```
 
-Open the application at:
+Open `http://localhost:5000`. The application creates `src/data/aegis.db` automatically using the included synthetic CSV. The `PORT` setting is supported by the inherited entry point.
 
-```text
-http://localhost:5000
-```
-
-The application creates its SQLite database automatically using the included synthetic CSV data.
-
-Run the engine checks with:
-
-```bash
+```sh
 python tests/test_engines.py
 ```
 
-This package uses Flask's development server and a per-process random session key. Sessions reset after restart. It is intended for local synthetic demonstrations, not production deployment.
+The app uses Flask's development server and a per-process random session key in this package. Sessions reset after restart. This is suitable for a local synthetic demonstration, **not production deployment**.
 
-## Repository Structure
+## Repository layout
 
 ```text
-AURA-05/
-├── README.md
-├── requirements.txt
-├── docs/
-├── src/
-│   └── data/
-├── data/
-├── models/
-├── screenshots/
-├── tests/
-├── UPLOAD_CHECKLIST.md
-└── THIRD_PARTY_NOTICES.md
+README.md
+requirements.txt
+docs/          Overview, architecture, methodology, sources and limitations
+src/           Flask entry point, storage, engines, templates, static assets
+src/data/      Synthetic CSV, generator, rules and reference knowledge
+data/          Dataset description and sharing policy
+models/        Explanation of why no trained model weights are supplied
+screenshots/   Real cropped dashboard screenshot
+tests/         Inherited engine checks
+UPLOAD_CHECKLIST.md
+THIRD_PARTY_NOTICES.md
 ```
+
+## Technology and AI methodology
+
+Python, Flask/Jinja, SQLite, HTML/CSS and vanilla JavaScript. Decisions come from explicit rules and baseline comparisons—not a trained neural model or an LLM clinician. There are no model weights or model-accuracy claims. See [methodology](docs/AI_METHODOLOGY.md).
+
+Replit Agent assisted the submission text, presentation copy and repository packaging. Prior AI involvement in the inherited application, logo or other assets has not been confirmed; the team must complete that disclosure before submission. Do not claim AI originated or did not originate the idea without checking the team's actual process.
+
+## NASA resources and data
+
+NASA publications inform communication latency, sleep/workload risk and isolation-support design. **No real astronaut health dataset is imported.** The measurements are synthetic. CSA Bio-Monitor is a future wearable reference, not a connected device.
+
+See [NASA and research sources](docs/NASA_DATA_SOURCES.md), [dataset notes](data/README.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
+
+## Important limitations
+
+- No connected wearable, automatic SOS dispatch, nearby-crew notification or real mission-control communication.
+- Some inherited UI messages say notices were sent; those messages describe a **simulation only**.
+- Custom thresholds and medical content require qualified review. NEWS2-derived bands do not mean complete NEWS2 compliance.
+- Hosted SQLite storage is on the server, not exclusively on the visitor's device. No production access control, isolation or privacy assurance is claimed.
+- Speech services and externally loaded fonts can need a network connection. Full offline operation is not guaranteed.
+- Safety wording in the original project is an intention, not proof that all clinical edge cases behave safely.
+
+See [testing and limitations](docs/TESTING_AND_LIMITATIONS.md).
 
 ## Team
 
 **NOVARAIA-X**
 
 | Member | Role |
-|---|---|
-| Jana mowafag mohmmad bni abdalhamed | Team Leader |
-| Jenan Fuad Sarhan | Team Member |
-| um kalthom abd alsalam | Team Member |
-| Shaimaa abbas rababa | Team Member |
+| --- | --- |
+| Jana mowafag mohmmad bni abdalhamed | Team leader |
+| Jenan Fuad Sarhan | Team member |
+| um kalthom abd alsalam | Team member |
+| Shaimaa abbas rababa | Team member |
 
-Individual technical responsibilities are not assigned here unless confirmed by the team.
+No individual technical responsibilities are assigned here without team confirmation.
 
-## License and Third-Party Materials
+## License and reuse
 
-No open-source license has been selected or granted by this package. Public availability on GitHub does not automatically grant permission to reuse the project.
-
-The team should verify ownership and permissions for inherited code, logos, images, reference materials, and other third-party assets.
-
-See [Third-Party Notices](THIRD_PARTY_NOTICES.md).
+No open-source license has been selected or granted by this package. A public repository is not automatically open source. The team must verify ownership and choose its license before granting reuse rights. Inherited logos, knowledge text and other assets still need provenance review. See [notices](THIRD_PARTY_NOTICES.md).

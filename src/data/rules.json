@@ -1,0 +1,31 @@
+{
+  "_note": "PROTOTYPE thresholds. NEWS2 bands are from the Royal College of Physicians (2017), an Earth hospital tool, not validated for spaceflight. Sleep, stress, focus, trend and timing values are team choices for the prototype.",
+  "baseline_days": 14,
+  "sleep_goal_h": 7.0, "sleep_low_h": 6.0, "sleep_very_low_48h": 5.0, "debt_mid_h": 4, "debt_high_h": 7,
+  "stress_high": 7, "stress_mid": 5, "hr_plus_for_stress": 10, "stress_days_persistent": 3,
+  "lonely_high": 7,
+  "lapse_ms": 355, "false_start_ms": 100, "min_trials": 20, "max_false_starts": 5,
+  "focus_drop_pct": 10, "lapse_plus": 5, "gap_points": 3, "max_games_per_day": 4, "ref_rt_ms": 250,
+  "news2": {
+    "resp_rate":   [[8, 3], [11, 1], [20, 0], [24, 2], [999, 3]],
+    "spo2_pct":    [[91, 3], [93, 2], [95, 1], [100, 0]],
+    "systolic_bp": [[90, 3], [100, 2], [110, 1], [219, 0], [999, 3]],
+    "heart_rate_bpm": [[40, 3], [50, 1], [90, 0], [110, 1], [130, 2], [999, 3]],
+    "temp_c":      [[35.0, 3], [36.0, 1], [38.0, 0], [39.0, 1], [99, 2]]
+  },
+  "news2_red_total": 5, "news2_emergency_total": 7, "news2_yellow_total": 3,
+  "remeasure_minutes": 10, "silent_remeasure_minutes": 5, "auto_sos_seconds": 10,
+  "trend_days": 3, "trend_hr_bpm": 5, "trend_rt_pct": 8, "trend_spo2": 2,
+  "monitor": {
+    "GREEN": "Twice a day (morning and evening) || مرتين باليوم (صباحاً ومساءً)",
+    "YELLOW": "After 10 minutes, then every 4 hours || بعد 10 دقائق، ثم كل 4 ساعات",
+    "YELLOW_STRONG": "Every hour until back to green || كل ساعة حتى يعود أخضر",
+    "RED": "Continuous (shown every 5 minutes) || مراقبة مستمرة (عرض كل 5 دقائق)"},
+  "comms": {
+    "iss":  {"name": "Low Earth orbit (ISS) || مدار الأرض (محطة الفضاء)", "one_way_s": 1, "src": "NASA: for spacecraft close to Earth the delay is almost negligible (relay through TDRS) || ناسا: للمركبات القريبة من الأرض التأخير شبه معدوم (عبر أقمار TDRS)"},
+    "moon": {"name": "Moon (Artemis) || القمر (Artemis)", "one_way_s": 1.3, "src": "Light travel time: 384,400 km at the speed of light is about 1.3 seconds || زمن انتقال الضوء: 384,400 كم بسرعة الضوء يساوي حوالي 1.3 ثانية"},
+    "mars_near": {"name": "Mars (closest approach) || المريخ (أقرب مسافة)", "one_way_s": 240, "src": "NASA: at Mars' closest approach the delay is about four minutes || ناسا: عند أقرب مسافة للمريخ التأخير حوالي أربع دقائق"},
+    "mars_far":  {"name": "Mars (greatest distance) || المريخ (أبعد مسافة)", "one_way_s": 1440, "src": "NASA: at the greatest distance the delay is around 24 minutes || ناسا: عند أبعد مسافة التأخير حوالي 24 دقيقة"}
+  },
+  "ground_review_min": 45
+}

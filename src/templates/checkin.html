@@ -1,0 +1,43 @@
+{% extends "base.html" %}{% block title %}{{ _('Daily check-in || التسجيل اليومي') }}{% endblock %}
+{% block body %}
+{% set t = x.today %}{% set m = x.checkins.get('morning', {}) %}{% set e = x.checkins.get('evening', {}) %}
+{% macro scale(name, label, val, lo, hi, left, right) %}
+<fieldset class="field scale"><legend>{{ _(label) }}</legend>
+<div class="scalebtns">{% for i in range(lo, hi + 1) %}<label class="chip"><input type="radio" name="{{ name }}" value="{{ i }}" {{ 'checked' if i == val }}><span>{{ i }}</span></label>{% endfor %}</div>
+<div class="row between hint"><span>{{ _(left) }}</span><span>{{ _(right) }}</span></div></fieldset>{% endmacro %}
+<div class="stack">
+  <div><div class="eyebrow">DAILY CHECK-IN</div><h1>{{ _('Daily check-in || التسجيل اليومي') }}</h1><p class="muted">{{ _('Twice a day: one minute in the morning, two in the evening. Measurements arrive automatically. This page only asks what no device can measure. || مرتان في اليوم: دقيقة في الصباح ودقيقتان في المساء. القياسات تأتي تلقائياً، وهذه الصفحة تسأل فقط عمّا لا يقيسه جهاز.') }}</p></div>
+  <div class="grid g2" style="align-items:start">
+    <form class="card stack" method="post">
+      <input type="hidden" name="kind" value="morning">
+      <div class="head"><div><div class="eyebrow">MORNING · ON WAKING</div><h2>{{ _('Morning || الصباح') }}</h2></div>{% if m %}<span class="pill GREEN">{{ _('Saved || محفوظ') }}</span>{% endif %}</div>
+      <div class="field"><label for="sleep_hours">{{ _('Hours of sleep || ساعات النوم') }} <span class="tag SIM">{{ _('FROM WATCH || من الساعة') }}</span></label>
+        <input type="number" step="0.1" min="0" max="14" id="sleep_hours" name="sleep_hours" value="{{ m.get('sleep_hours', t.sleep_hours) }}"><span class="hint">{{ _('Read automatically. You can correct it. || تُقرأ تلقائياً، وتستطيع تصحيحها.') }}</span></div>
+      {{ scale('sleep_quality', 'Sleep quality || جودة النوم', m.get('sleep_quality', 3), 1, 5, 'Poor || سيئة', 'Excellent || ممتازة') }}
+      <div class="field"><span>{{ _('What was the sleep problem last night? || ما مشكلة النوم الليلة الماضية؟') }}</span>
+        <div class="chips">{% for k, s in SUP.sleep.items() %}<label class="chip"><input type="radio" name="sleep_problem" value="{{ k }}" {{ 'checked' if m.get('sleep_problem', t.sleep_problem) == k }}><span>{{ _(s.name) }}</span></label>{% endfor %}</div></div>
+      {{ scale('alertness', 'How awake and focused do you feel? || كم تشعر أنك صاحٍ ومركّز؟', m.get('alertness', t.alertness_self_1to10|int), 1, 10, 'Very sleepy || نعسان جداً', 'Fully focused || بكامل تركيزي') }}
+      <div class="row"><button class="btn">{{ _('Save morning || حفظ الصباح') }}</button><a class="btn ghost" href="/game">{{ _('Then the focus game || ثم لعبة التركيز') }}</a></div>
+    </form>
+    <form class="card stack" method="post" id="evening">
+      <input type="hidden" name="kind" value="evening">
+      <div class="head"><div><div class="eyebrow">EVENING · BEFORE SLEEP</div><h2>{{ _('Evening || المساء') }}</h2></div>{% if e %}<span class="pill GREEN">{{ _('Saved || محفوظ') }}</span>{% endif %}</div>
+      {{ scale('mood', 'Mood || المزاج', e.get('mood', t.mood_self_1to10|int), 1, 10, 'Low || منخفض', 'Excellent || ممتاز') }}
+      {{ scale('stress', 'Stress || التوتر', e.get('stress', t.stress_self_1to10|int), 1, 10, 'Calm || هادئ', 'Very stressed || متوتر جداً') }}
+      {{ scale('workload', 'Workload today || ضغط العمل اليوم', e.get('workload', t.workload_1to10|int), 1, 10, 'Light || خفيف', 'Very heavy || ثقيل جداً') }}
+      {{ scale('lonely', 'Feeling lonely || الشعور بالوحدة', e.get('lonely', t.loneliness_1to10|int), 1, 10, 'Not at all || لا أشعر', 'Strongly || شديد') }}
+      {{ scale('team', 'Your relationship with the team today || علاقتك مع الفريق اليوم', e.get('team', t.team_1to5|int), 1, 5, 'Tense || متوترة', 'Excellent || ممتازة') }}
+      <div class="field"><span>{{ _('What did you feel today? Choose all that apply. || ماذا شعرت اليوم؟ اختر ما ينطبق.') }}</span>
+        <div class="chips">{% for k, f in SUP.feelings.items() %}<label class="chip"><input type="checkbox" name="feelings" value="{{ k }}" {{ 'checked' if k in e.get('feelings', []) }}><span>{{ _(f.name) }}</span></label>{% endfor %}</div></div>
+      <div class="grid g3">
+        <div class="field"><label for="meals">{{ _('Meals || الوجبات') }}</label><select id="meals" name="meals">{% for i in range(0, 5) %}<option {{ 'selected' if i == e.get('meals', t.meals|int) }}>{{ i }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="water">{{ _('Water || شرب الماء') }}</label><select id="water" name="water">{% set w = e.get('water', 'ok' if t.water_ok else 'low') %}<option value="ok" {{ 'selected' if w == 'ok' }}>{{ _('Enough || كافٍ') }}</option><option value="low" {{ 'selected' if w == 'low' }}>{{ _('Less than usual || أقل من المعتاد') }}</option></select></div>
+        <div class="field"><label for="caffeine">{{ _('Caffeine cups || أكواب الكافيين') }}</label><select id="caffeine" name="caffeine">{% for i in range(0, 7) %}<option {{ 'selected' if i == e.get('caffeine', t.caffeine_cups|int) }}>{{ i }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="field"><label for="note">{{ _('Journal note (optional) || ملاحظة لليوميات (اختياري)') }}</label><textarea id="note" name="note" rows="2">{{ e.get('note', '') }}</textarea></div>
+      <button class="btn">{{ _('Save evening || حفظ المساء') }}</button>
+    </form>
+  </div>
+  <div class="note"><b>{{ _('Why twice? || لماذا مرتان؟') }}</b> {{ _('Sleep is asked about in the morning while it is fresh, mood and stress at the end of the day after the tasks. The frequency is a prototype design choice. ISS astronauts fill in similar short ratings with the Reaction Self-Test. The food log is inspired by the ISS Food Intake Tracker. || النوم يُسأل عنه صباحاً وهو حاضر في الذهن، والمزاج والتوتر في آخر اليوم بعد المهام. التكرار اختيار تصميم للنموذج الأولي. رواد المحطة يملؤون تقييمات قصيرة مشابهة مع اختبار Reaction Self-Test. سجل الأكل مستوحى من ISS Food Intake Tracker.') }}</div>
+</div>
+{% endblock %}

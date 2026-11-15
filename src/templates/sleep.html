@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block title %}{{ _('Sleep support || دعم النوم') }}{% endblock %}
+{% block body %}
+{% set P = SUP.sleep[problem] %}{% set TAGS = {'NASA': 'NASA', 'IFRC': 'IFRC', 'PROTO': 'PROTOTYPE'} %}
+<div class="stack">
+  <div><div class="eyebrow">SLEEP SUPPORT</div><h1>{{ _('Sleep support || دعم النوم') }}</h1><p class="muted">{{ _('First we find the type of problem, then steps that fit it. Short sleep is a contributing factor in many symptoms, not necessarily the cause. || نحدد نوع المشكلة أولاً، ثم خطوات تناسبها. قلة النوم عامل مساهم في كثير من الأعراض، وليست بالضرورة السبب.') }}</p></div>
+  {% if saved %}<div class="note"><b>{{ _('Session saved to the log. || حُفظت الجلسة في السجل.') }}</b></div>{% endif %}
+  <div class="grid g-main" style="align-items:start">
+    <section class="card stack">
+      <h2>{{ _('What type of problem? || ما نوع المشكلة؟') }}</h2>
+      <div class="chips">{% for k, s in SUP.sleep.items() %}<a class="btn sm {{ '' if k == problem else 'ghost' }}" href="/sleep?problem={{ k }}">{{ _(s.name) }}</a>{% endfor %}</div>
+      <h3>{{ _(P.name) }}: {{ _('what to do || ماذا تفعل') }}</h3>
+      <ol class="steps">{% for a in P.actions %}<li><div style="flex:1">{{ _(a[0]) }}<div class="src"><span class="tag {{ a[1] }}">{{ TAGS[a[1]] }}</span> {{ a[2] }}</div></div></li>{% endfor %}</ol>
+      <form method="post"><input type="hidden" name="problem" value="{{ problem }}"><div class="row"><button class="btn">{{ _('Save session || حفظ الجلسة') }}</button><a class="btn ghost" href="/calm?back=/sleep">{{ _('Breathing before sleep || تنفس قبل النوم') }}</a><a class="btn ghost" href="/tomorrow">{{ _('Tomorrow plan || خطة الغد') }}</a></div></form>
+      <p class="note">{{ _('NASA = stated on a NASA page we read. IFRC = first aid guidelines 2020. PROTOTYPE = general practice chosen by the team, needs flight-surgeon review. The system does not suggest sleep medication. || NASA = مذكور في صفحة لناسا قرأناها. IFRC = إرشادات الإسعاف الأولي 2020. PROTOTYPE = ممارسة عامة اختارها الفريق وتحتاج مراجعة طبيب الرحلة. النظام لا يقترح أدوية نوم.') }}</p>
+    </section>
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">SLEEP · 7 NIGHTS</div><h2>{{ _('Your picture now || صورتك الآن') }}</h2></div><span class="pill {{ 'GREEN' if x.sleep.status == 'OK' else 'YELLOW' if x.sleep.status == 'WATCH' else 'RED' }}">{{ _({'OK': 'Good || جيد', 'WATCH': 'Watch || راقب', 'LOW': 'Short || قليل'}[x.sleep.status]) }}</span></div>
+      <div class="bars" role="img" aria-label="{{ _('Sleep hours for the last seven nights || ساعات النوم لآخر سبع ليال') }}">{% for h in x.nights %}<div class="{{ 'vlow' if h < 5 else 'low' if h < 6 }}" style="height:{{ (h / 9 * 100)|round }}%"><span>{{ h }}</span></div>{% endfor %}</div>
+      <div class="grid g3" style="margin-top:12px">
+        <div class="tile"><span class="small muted">{{ _('Last night || آخر ليلة') }}</span><div class="v">{{ x.sleep.last }}</div></div>
+        <div class="tile"><span class="small muted">{{ _('48 h avg || معدل 48 س') }}</span><div class="v">{{ x.sleep.avg48 }}</div></div>
+        <div class="tile"><span class="small muted">{{ _('Debt 7 d || دَين 7 أيام') }}</span><div class="v">{{ x.sleep.debt7 }}</div></div>
+      </div>
+      <ul class="clean small muted" style="margin-top:12px">
+        <li>• {{ _('Astronauts sleep about 6 hours against 8.5 scheduled (Barger 2014). || الرواد ينامون نحو 6 ساعات مقابل 8.5 مجدولة (Barger 2014).') }}</li>
+        <li>• {{ _('Sleep of 6 hours or less was linked to slower reactions and higher stress (24 ISS astronauts). || نوم 6 ساعات أو أقل ارتبط بتفاعل أبطأ وتوتر أعلى (24 رائداً على المحطة).') }}</li>
+        <li>• {{ _('On the station there are 16 sunrises and sunsets a day, which disturbs the body clock (NASA). || في المحطة 16 شروقاً وغروباً يومياً تربك الساعة البيولوجية (NASA).') }}</li>
+      </ul>
+      <p class="src" style="margin-top:8px">{{ _('Rule: "short" if the two-night average is under 5 hours or the debt is 7 hours or more. Prototype values. || القاعدة: «قليل» إذا معدل ليلتين أقل من 5 ساعات أو الدَّين 7 ساعات فأكثر. قيم أولية.') }}</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

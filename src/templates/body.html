@@ -1,0 +1,157 @@
+{% extends "base.html" %}{% block title %}{{ _('Report a symptom || تسجيل شكوى') }}{% endblock %}
+{% block body %}
+<div class="stack">
+  <div><div class="eyebrow">SYMPTOM ASSESSMENT</div><h1>{{ _('Where do you feel the problem? || أين تشعر بالمشكلة؟') }}</h1><p class="muted">{{ _('Say it, or turn the body 360 degrees and press the place. Then answer a few yes or no danger questions. || قلها بصوتك، أو أدِر المجسّم 360 درجة واضغط على المكان. ثم أجب عن أسئلة خطر قليلة بنعم أو لا.') }}</p></div>
+  <form method="post" action="/triage" class="grid g2" id="f" style="align-items:start">
+    <div class="stack">
+      <section class="card voice">
+        <div class="row" style="flex-wrap:nowrap;align-items:center">
+          <button type="button" class="mic" id="mic" aria-label="{{ _('Start voice recording || ابدأ التسجيل الصوتي') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+          <div style="flex:1"><div class="eyebrow">VOICE ASSISTANT</div><h2>{{ _('Tell me what you feel || احكِ شو حاسس') }}</h2><p class="muted small" id="vstate">{{ _('Press the microphone and say it in a normal sentence. Say "help me" for an emergency. || اضغط المايك وقل شكواك بجملة عادية. قل «ساعدوني» للطوارئ.') }}</p></div>
+        </div>
+        <div class="chat" id="chat" style="margin-top:10px" aria-live="polite"></div>
+        <div class="row" id="ynrow" hidden style="margin-top:8px"><button type="button" class="btn" id="vyes">{{ _('Yes || نعم') }}</button><button type="button" class="btn ghost" id="vno">{{ _('No || لا') }}</button><button type="button" class="btn ghost sm" id="vrep">{{ _('Repeat the question || أعد السؤال') }}</button></div>
+        <div class="row" style="margin-top:10px"><input type="text" id="vtext" aria-label="{{ _('Type your complaint || اكتب شكواك') }}" placeholder="{{ _('Or type it: my head hurts and I feel dizzy || أو اكتب: راسي بوجعني وحاسس بدوخة') }}" style="flex:1"><button type="button" class="btn sm" id="vsend">{{ _('Send || إرسال') }}</button></div>
+        <p class="src" style="margin-top:6px" id="vsup"></p>
+      </section>
+      <section class="card">
+        <div class="head"><h2>1 · {{ _('Area || المنطقة') }}</h2><span class="small muted" id="regionName">{{ _('Not chosen yet || لم تُختر بعد') }}</span></div>
+        <div class="chips" id="regions">{% for r in KB.regions %}<button type="button" class="btn sm ghost" data-region="{{ r.id }}">{{ r.name }}</button>{% endfor %}</div>
+      </section>
+      <section class="card" id="symCard" hidden>
+        <div class="head"><h2>2 · {{ _('Symptom || العَرَض') }}</h2><span class="small muted">{{ _('You can choose more than one || تستطيع اختيار أكثر من واحد') }}</span></div>
+        <div class="chips" id="symptoms"></div>
+      </section>
+      <section class="card" id="qCard" hidden>
+        <div class="head"><h2>3 · {{ _('Danger questions || أسئلة الخطر') }}</h2><span class="small muted">{{ _('Yes or no only || نعم أو لا فقط') }}</span></div>
+        <div class="stack" id="questions" style="gap:14px"></div>
+      </section>
+      <section class="card">
+        <div class="head"><h2>4 · {{ _('Alertness and vital signs || الوعي والقياسات') }}</h2><span class="tag AUTO">{{ _('AUTOMATIC || تلقائي') }}</span></div>
+        <div class="yn"><span>{{ _('Fully awake and focused? || صاحٍ ومركّز تماماً؟') }}</span>
+          <div class="chips"><label class="chip"><input type="radio" name="alert" value="1" checked><span>{{ _('Yes || نعم') }}</span></label><label class="chip danger"><input type="radio" name="alert" value="0"><span>{{ _('No, confused || لا، مشوّش') }}</span></label></div></div>
+        <p class="small" style="margin-top:10px">{{ _('Taken from the sensors now || مأخوذة من الحسّاسات الآن') }}: {% for k in VITALS %}<span class="tag {{ x.vsrc[k] }}">{{ _(VLABEL[k]) }} {{ '%g' % x.vitals[k] }}</span> {% endfor %}</p>
+        <details style="margin-top:8px"><summary class="small" style="cursor:pointer;color:var(--teal-ink)">{{ _('Edit the readings (prototype only) || تعديل القياسات (للنموذج الأولي فقط)') }}</summary>
+          <div class="grid g3" style="margin-top:10px">{% for k in VITALS %}<div class="field"><label for="b{{ k }}" class="small">{{ _(VLABEL[k]) }}</label><input id="b{{ k }}" type="number" step="0.1" name="{{ k }}" value="{{ '%g' % x.vitals[k] }}"></div>{% endfor %}</div></details>
+        <button class="btn" style="margin-top:14px;width:100%" id="go">{{ _('Assess || قيّم الحالة') }}</button>
+        <p class="src" style="margin-top:8px">{{ _('Nurse-level assessment and triage, not a medical diagnosis. || تقييم وفرز بمستوى الممرّض، وليس تشخيصاً طبياً.') }} {{ KB.medication_rule }}</p>
+      </section>
+    </div>
+    <div class="bodywrap">
+      <div class="bodyhud"><span class="tag" id="facing"></span><span class="tag" id="deg">0°</span></div>
+      <canvas id="body3d" aria-label="{{ _('3D body model. The area buttons are an alternative. || مجسّم ثلاثي الأبعاد للجسم. أزرار المناطق بديل عنه.') }}"></canvas>
+      <div class="bodyctl">
+        <button type="button" class="btn sm ghost" data-turn="0">{{ _('Front || أمام') }}</button><button type="button" class="btn sm ghost" data-turn="90">{{ _('Right || يمين') }}</button>
+        <button type="button" class="btn sm ghost" data-turn="180">{{ _('Back || خلف') }}</button><button type="button" class="btn sm ghost" data-turn="270">{{ _('Left || يسار') }}</button>
+        <button type="button" class="btn sm ghost" id="organBtn"></button><button type="button" class="btn sm" id="autoBtn"></button>
+      </div>
+      <p class="src" style="padding:0 14px 12px;text-align:center">{{ _('Schematic model for choosing the place. Not an anatomical image. || مجسّم تخطيطي لاختيار المكان، وليس صورة تشريحية.') }}</p>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const KB = {{ KB|tojson }}, VIT = {{ x.vitals|tojson }}, V = KB.voice;
+const TX = {{ _({
+ 'always': 'This symptom is always treated as high risk. || هذا العَرَض يُعامَل دائماً كحالة خطرة.', 'yes': 'Yes || نعم', 'no': 'No || لا',
+ 'listening': 'Listening now… || أسمعك الآن…', 'heard': 'Heard: || سمعت:', 'nomic': 'Microphone not allowed. Use the buttons or type. || لم يُسمح بالمايك. استخدم الأزرار أو الكتابة.',
+ 'silence': 'I did not hear anything. Press the microphone or use the buttons. || لم أسمع شيئاً. اضغط المايك أو استخدم الأزرار.',
+ 'unsupported': 'This browser has no speech recognition. Use Chrome or Edge, or type. || هذا المتصفح لا يدعم التعرّف على الكلام. استخدم Chrome أو Edge، أو اكتب.',
+ 'sup': 'Understanding uses keywords, not a trained model. Speech recognition uses the browser service (needs a connection in the prototype). || الفهم بكلمات مفتاحية وليس نموذجاً مدرَّباً. التعرّف على الكلام يستخدم خدمة المتصفح (يحتاج اتصالاً في النموذج الأولي).',
+ 'emergency': 'Emergency. Opening the Silent Hour now. || طوارئ. أفتح الساعة الصامتة الآن.', 'yn': 'I did not understand. Say yes or no, or press a button. || لم أفهم. قل نعم أو لا، أو اضغط الزر.',
+ 'notund': 'I did not understand the complaint. Say it in other words, or choose from the body. || لم أفهم الشكوى. قلها بكلمات أخرى، أو اختر من المجسّم.',
+ 'understood': 'I understood: || فهمت:', 'correct': 'Is that correct? || هل هذا صحيح؟', 'again': 'All right. Say your complaint again. || حسناً. قل شكواك مرة ثانية.',
+ 'question': 'Question || سؤال', 'of': 'of || من', 'recorded': 'Recorded: || سجّلت:', 'and': ' and  ||  و',
+ 'confirm': 'To confirm. Symptoms: || للتأكيد. الأعراض:', 'saidyes': 'You answered yes to: || أجبت بنعم على:', 'allno': 'You answered no to all danger questions. || أجبت بلا على كل أسئلة الخطر.',
+ 'vit': 'Readings from the sensors: pulse {hr}, breathing {rr}, oxygen {o2} percent, pressure {sys} over {dia}, temperature {t}. || القياسات من الحسّاسات: النبض {hr}، التنفس {rr}، الأكسجين {o2} بالمئة، الضغط {sys} على {dia}، الحرارة {t}.',
+ 'assessq': 'Shall I assess now? || هل أقيّم الحالة الآن؟', 'assessing': 'Assessing now. || أقيّم الحالة الآن.', 'edit': 'All right. Change the answers in the list, then press Assess. || حسناً. عدّل الإجابات من القائمة ثم اضغط قيّم الحالة.',
+ 'front': 'Front view || من الأمام', 'back': 'Back view || من الخلف', 'sideview': 'Side view || من الجانب', 'stop': 'Stop rotation || إيقاف الدوران', 'auto': 'Auto rotate || دوران تلقائي',
+ 'organs_on': 'Hide organs || إخفاء الأعضاء', 'organs_off': 'Show organs || إظهار الأعضاء' })|tojson }};
+window.REGION_NAMES = Object.fromEntries(KB.regions.map(r => [r.id, r.name])); window.BODY_TX = TX;
+const chosen = new Set(); let region = null;
+const $ = id => document.getElementById(id);
+window.pickRegion = function (id) {
+  region = KB.regions.find(r => r.id === id); if (window.body3d) body3d.select(id);
+  $("regionName").textContent = region.name; $("symCard").hidden = false;
+  document.querySelectorAll("[data-region]").forEach(b => b.classList.toggle("ghost", b.dataset.region !== id));
+  renderSymptoms();
+};
+function renderSymptoms() {
+  $("symptoms").innerHTML = region.symptoms.map(s => `<label class="chip ${KB.symptoms[s].always_red ? "danger" : ""}"><input type="checkbox" value="${s}" ${chosen.has(s) ? "checked" : ""}><span>${KB.symptoms[s].name}</span></label>`).join("");
+  $("symptoms").querySelectorAll("input").forEach(i => i.onchange = () => { i.checked ? chosen.add(i.value) : chosen.delete(i.value); renderQuestions(); });
+}
+function renderQuestions() {
+  const keep = {}; document.querySelectorAll("#questions input:checked").forEach(i => keep[i.name] = i.value);
+  $("qCard").hidden = chosen.size === 0;
+  $("questions").innerHTML = [...chosen].map(s => { const S = KB.symptoms[s];
+    const qs = S.q.map((q, i) => { const n = `q_${s}_${i}`, y = keep[n] === "1";
+      return `<div class="yn"><span>${q[0]}</span><div class="chips"><label class="chip danger"><input type="radio" name="${n}" value="1" ${y ? "checked" : ""}><span>${TX.yes}</span></label><label class="chip"><input type="radio" name="${n}" value="0" ${y ? "" : "checked"}><span>${TX.no}</span></label></div></div>`; }).join("");
+    return `<div class="stack" style="gap:8px"><div class="row between"><h3>${S.name}</h3><span class="src">${S.source}</span></div>${S.always_red ? `<p class="c-RED">${TX.always}</p>` : qs}<input type="hidden" name="sym" value="${s}"></div>`; }).join("");
+}
+$("f").addEventListener("submit", () => {
+  document.querySelectorAll("#questions input[type=radio]:checked").forEach(i => { if (i.value === "1") { const parts = i.name.split("_"); const qi = parts.pop(); parts.shift();
+    const h = document.createElement("input"); h.type = "hidden"; h.name = "yes"; h.value = parts.join("_") + ":" + qi; $("f").appendChild(h); } });
+});
+document.querySelectorAll("[data-region]").forEach(b => b.onclick = () => pickRegion(b.dataset.region));
+
+// ---- voice conversation: listen -> match keywords -> confirm -> danger questions -> read back -> assess ----
+const chat = $("chat"); let step = null, queue = [], qi = 0, rec = null;
+const say = (t, who) => { const d = document.createElement("div"); d.className = who || "sys"; d.textContent = t; chat.append(d); chat.scrollTop = 1e6; };
+function ask(text, handler) { step = handler; say(text); $("ynrow").hidden = false; Voice.speak(text, () => startListen()); }
+function startListen() {
+  if (!Voice.supported) { $("vstate").textContent = TX.unsupported; return; }
+  $("mic").classList.add("on"); $("vstate").textContent = TX.listening;
+  rec = Voice.listen(t => { $("mic").classList.remove("on"); $("vstate").textContent = TX.heard + " " + t.split(" | ")[0]; heard(t); },
+    err => { $("mic").classList.remove("on"); $("vstate").textContent = err === "not-allowed" ? TX.nomic : TX.silence; });
+}
+function heard(t) {
+  say(t.split(" | ")[0], "me");
+  if (Voice.has(t, V.emergency)) { say(TX.emergency); Voice.speak(TX.emergency, () => location.href = "/silent/start"); return; }
+  if (step) { const y = Voice.has(t, V.yes), n = Voice.has(t, V.no);
+    if (Voice.has(t, V.repeat)) return step("repeat");
+    if (y === n) { say(TX.yn); Voice.speak(TX.yn, startListen); return; }
+    return step(y ? "yes" : "no"); }
+  complaint(t);
+}
+function complaint(t) {
+  const found = Object.keys(KB.symptoms).filter(id => Voice.has(t, KB.symptoms[id].keywords));
+  if (!found.length) { say(TX.notund); Voice.speak(TX.notund); return; }
+  const names = found.map(id => KB.symptoms[id].name).join(TX.and), q = TX.understood + " " + names + ". " + TX.correct;
+  ask(q, a => {
+    if (a === "repeat") return ask(q, step);
+    if (a === "no") { step = null; $("ynrow").hidden = true; say(TX.again); Voice.speak(TX.again, startListen); return; }
+    chosen.clear(); found.forEach(id => chosen.add(id));
+    pickRegion(KB.regions.find(r => r.symptoms.includes(found[0])).id); renderQuestions();
+    queue = []; found.forEach(id => KB.symptoms[id].q.forEach((q, i) => queue.push({ id, i, q: q[0] }))); qi = 0; nextQ();
+  });
+}
+function nextQ() {
+  if (qi >= queue.length) return readBack();
+  const q = queue[qi];
+  ask(`${TX.question} ${qi + 1} ${TX.of} ${queue.length}. ${q.q}`, a => {
+    if (a === "repeat") return nextQ();
+    const r = document.querySelector(`input[name="q_${q.id}_${q.i}"][value="${a === "yes" ? 1 : 0}"]`); if (r) r.checked = true;
+    q.a = a; const m = TX.recorded + " " + (a === "yes" ? TX.yes : TX.no); say(m); qi++; Voice.speak(m, nextQ);
+  });
+}
+function readBack() {
+  const yes = queue.filter(q => q.a === "yes").map(q => q.q);
+  const vit = TX.vit.replace("{hr}", Math.round(VIT.heart_rate_bpm)).replace("{rr}", Math.round(VIT.resp_rate)).replace("{o2}", Math.round(VIT.spo2_pct)).replace("{sys}", Math.round(VIT.systolic_bp)).replace("{dia}", Math.round(VIT.diastolic_bp)).replace("{t}", VIT.temp_c);
+  const sum = TX.confirm + " " + [...chosen].map(id => KB.symptoms[id].name).join(TX.and) + ". " + (yes.length ? TX.saidyes + " " + yes.join(" ") + " " : TX.allno + " ") + vit + " " + TX.assessq;
+  ask(sum, a => {
+    if (a === "repeat") return readBack();
+    step = null; $("ynrow").hidden = true;
+    if (a === "yes") { say(TX.assessing); Voice.speak(TX.assessing, () => $("f").requestSubmit()); } else { say(TX.edit); Voice.speak(TX.edit); }
+  });
+}
+$("mic").onclick = () => { Voice.stop(); if (rec) try { rec.abort(); } catch (e) {} startListen(); };
+$("vyes").onclick = () => { Voice.stop(); if (step) { say(TX.yes, "me"); step("yes"); } };
+$("vno").onclick = () => { Voice.stop(); if (step) { say(TX.no, "me"); step("no"); } };
+$("vrep").onclick = () => { if (step) step("repeat"); };
+$("vsend").onclick = () => { const t = $("vtext").value.trim(); if (t) { $("vtext").value = ""; heard(t); } };
+$("vtext").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("vsend").click(); } });
+$("vsup").textContent = Voice.supported ? TX.sup : TX.unsupported;
+</script>
+<script src="{{ url_for('static', filename='body3d.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{
+ "_note": "PROTOTYPE support content, 'English || Arabic'. Tags: NASA = stated on a NASA page we read; IFRC = IFRC 2020 guidelines; PROTO = general good practice chosen by the team, needs flight-surgeon review. Every action must be possible inside a spacecraft.",
+ "sleep": {
+  "onset": {"name": "Hard to fall asleep || صعوبة ببدء النوم", "actions": [
+   ["Switch the cabin lights to the pre-sleep setting and dim them before bed. || شغّل ضوء «ما قبل النوم» وخفّف الإضاءة قبل النوم.", "NASA", "ISS LED lighting simulates the day-night cycle (HRP sleep risk page)"],
+   ["Keep the same sleep and wake time as far as the schedule allows. || ثبّت موعد النوم والاستيقاظ قدر ما يسمح الجدول.", "NASA", "CONNECT, Needs: routine"],
+   ["Slow breathing for 3 minutes before sleep. || تمرين تنفس هادئ 3 دقائق قبل النوم.", "IFRC", "Calming techniques, Psychological first aid"],
+   ["Avoid caffeine in the second half of the day. || تجنّب الكافيين في النصف الثاني من اليوم.", "PROTO", "NASA is studying caffeine and light as sleep countermeasures"]]},
+  "awakenings": {"name": "Waking up many times || استيقاظ متكرر", "actions": [
+   ["Use earplugs and an eye mask in the sleep station. || سدادات أذن وقناع عين في مقصورة النوم.", "PROTO", "Noise and light disturb sleep on the station (NASA sleep risk page)"],
+   ["Record the time and cause of each awakening: noise, temperature, worry. || سجّل وقت كل استيقاظ وسببه: ضجيج، حرارة، قلق.", "PROTO", "Helps the flight surgeon find the cause"],
+   ["If it repeats for 3 nights, the ground team is notified. || إن تكرر 3 ليالٍ يُبلَّغ الفريق الأرضي.", "PROTO", "Prototype rule"]]},
+  "uncomfortable": {"name": "Uncomfortable sleep || نوم غير مريح", "actions": [
+   ["Adjust the sleeping-bag straps and the airflow in the sleep station. || عدّل أربطة كيس النوم وتهوية المقصورة.", "PROTO", "Needs confirmation from crew procedures"],
+   ["If the cause is back pain, open the body model and record the symptom. || إن كان السبب ألماً بالظهر افتح مجسّم الجسم وسجّل العَرَض.", "IFRC", "Acute lower back pain, p.238"]]},
+  "worry": {"name": "Worry and racing thoughts || قلق وتفكير", "actions": [
+   ["Write what is on your mind in the journal before bed. || اكتب ما يشغلك في اليوميات قبل النوم.", "NASA", "CONNECT, Countermeasures: journaling"],
+   ["A short breathing or mindfulness exercise. || تمرين تنفس أو تأمل قصير.", "NASA", "CONNECT, Countermeasures: mindfulness"],
+   ["Open Psychological Support and name what you feel. || افتح «الدعم النفسي» وحدّد ما تشعر به.", "IFRC", "Look, Listen, Link"]]},
+  "schedule": {"name": "Schedule or workload || الجدول أو ضغط العمل", "actions": [
+   ["Ask the commander to protect sleep time in tomorrow's schedule. || اطلب من القائد حماية وقت النوم في جدول الغد.", "NASA", "Designated times for rest are part of the routine to prevent burnout"],
+   ["Review tomorrow's plan and accept the suggested changes. || راجع «خطة الغد» واقبل التعديلات المقترحة.", "PROTO", "Builds on the idea of NASA Playbook"]]},
+  "none": {"name": "No problem || لا توجد مشكلة", "actions": [
+   ["Keep the same routine. || حافظ على نفس الروتين.", "NASA", "CONNECT, Needs"]]}
+ },
+ "feelings": {
+  "pressure": {"name": "Under pressure || ضغط", "actions": [
+   ["Breathe slowly for 3 minutes now. || تنفّس ببطء 3 دقائق الآن.", "IFRC", "Calming techniques", "/calm"],
+   ["Split the big task into parts and ask a crewmate for help. || قسّم المهمة الكبيرة واطلب مساعدة زميل.", "NASA", "CONNECT, Expeditionary mindset: ask for and give support"],
+   ["Review tomorrow's plan to lighten the load. || راجع خطة الغد لتخفيف الحمل.", "PROTO", "Tomorrow plan", "/tomorrow"]]},
+  "exhausted": {"name": "Exhausted || إنهاك", "actions": [
+   ["Open Sleep Support: exhaustion is often linked to sleep. || افتح «دعم النوم»: الإنهاك غالباً مرتبط بالنوم.", "NASA", "HRP Risk: Inadequate Sleep", "/sleep"],
+   ["Play the focus game before any precise task. || العب لعبة التركيز قبل أي مهمة دقيقة.", "NASA", "Reaction Self-Test", "/game"],
+   ["Take the rest time in the schedule. Do not skip it. || خذ وقت الراحة المحدد في الجدول ولا تتخطّه.", "NASA", "Designated times for rest and self-care"]]},
+  "lonely": {"name": "Lonely || وحدة", "actions": [
+   ["Arrange a call with family or a friend. || رتّب مكالمة مع العائلة أو صديق.", "NASA", "CONNECT, Networking"],
+   ["Share a meal or an activity with a crewmate today. || شارك وجبة أو نشاطاً مع زميل اليوم.", "NASA", "CONNECT, Community"],
+   ["Ask for a private session with the ground support team. || اطلب جلسة خاصة مع فريق الدعم الأرضي.", "NASA", "Private psychological conferences (NASA BHP)"]]},
+  "anxious": {"name": "Anxious || قلق", "actions": [
+   ["Breathe slowly for 3 minutes now. || تنفّس ببطء 3 دقائق الآن.", "IFRC", "Calming techniques", "/calm"],
+   ["Write what worries you and what you can control. || اكتب ما يقلقك وما الذي تستطيع التحكم به.", "NASA", "CONNECT, Countermeasures: journaling and reframing"],
+   ["Talk with a crewmate you trust. || تحدّث مع زميل تثق به.", "IFRC", "Link: connect with social support"]]},
+  "low": {"name": "Low mood || مزاج منخفض", "actions": [
+   ["Keep today's exercise session: movement is part of self-care. || حافظ على تمرين اليوم: الحركة جزء من العناية بالنفس.", "NASA", "CONNECT, Needs"],
+   ["A short hobby: music, photographing Earth, reading. || هواية قصيرة: موسيقى، تصوير الأرض، قراءة.", "NASA", "CONNECT, Needs: hobbies"],
+   ["If it lasts several days, ask for a session with ground support. || إن استمر عدة أيام اطلب جلسة مع الدعم الأرضي.", "NASA", "Private psychological conferences (NASA BHP)"]]},
+  "tension": {"name": "Tension with a crewmate || توتر مع زميل", "actions": [
+   ["Take a short distance first, then talk calmly. || خذ مسافة قصيرة أولاً ثم تحدّث بهدوء.", "IFRC", "Calming techniques: create distance"],
+   ["Respect different views and start from what you agree on. || احترم اختلاف وجهات النظر وابدأ بما تتفقان عليه.", "NASA", "CONNECT, Expeditionary mindset"],
+   ["Open Team Support for suggestions for the whole crew. || افتح «دعم الفريق» لاقتراحات للطاقم كله.", "PROTO", "Team support", "/team"]]},
+  "fine": {"name": "I am fine || أنا بخير", "actions": [
+   ["Good. Note what helped you today so you can return to it. || ممتاز. سجّل ما ساعدك اليوم لتعود إليه.", "NASA", "CONNECT, Training: learn from your experience"]]}
+ },
+ "escalate": {
+  "title": "When does a human step in? || متى يتدخل إنسان؟",
+  "src": "IFRC 2020, Psychological first aid: referral criteria",
+  "items": ["Has not slept for days and seems confused || لم ينم منذ أيام ويبدو مشوّشاً", "Cannot do tasks or take care of self || لا يستطيع أداء مهامه أو العناية بنفسه", "Has lost control of behaviour || فقد السيطرة على تصرفاته", "Thoughts of harming self or others || أفكار بإيذاء النفس أو الآخرين"],
+  "action": "In these cases the system does not stop at advice: it asks a crewmate to stay with the person and opens an urgent private call request to ground support. || في هذه الحالات النظام لا يكتفي بالنصائح: يطلب من زميل البقاء معه، ويفتح طلب اتصال خاص وعاجل مع الدعم الأرضي."
+ },
+ "team": {
+  "suggestions": {
+   "RED": ["Spread the heavy tasks over more people and postpone what is not essential. || وزّعوا المهام الثقيلة على عدد أكبر، وأجّلوا غير الضروري.", "A short shared break today. || استراحة مشتركة قصيرة اليوم.", "The commander asks ground support for a crew conference. || القائد يطلب اتصالاً مع الدعم الأرضي للطاقم."],
+   "YELLOW": ["A shared break or a crew meal today. || استراحة مشتركة أو وجبة جماعية اليوم.", "Give the precise task to the most ready crewmate. || بدّلوا المهمة الدقيقة للزميل الأكثر جاهزية.", "A 5-minute meeting: what does each person need tomorrow? || اجتماع قصير 5 دقائق: ماذا يحتاج كل واحد غداً؟"],
+   "GREEN": ["The crew is in good shape. Keep the shared meal and the exercise. || الطاقم بحالة جيدة. حافظوا على الوجبة الجماعية والتمرين."]
+  },
+  "skills": ["Self-care || العناية بالنفس", "Team care || العناية بالفريق", "Leadership and followership || القيادة والتبعية", "Communication || التواصل", "Group living || العيش الجماعي"]
+ },
+ "tasks": [
+  {"title": "Robotic arm check || فحص الذراع الآلي", "risk": "high", "crew_id": "ASTRO-02"},
+  {"title": "Spacewalk suit preparation || تجهيز بدلة المشي الفضائي", "risk": "high", "crew_id": "ASTRO-04"},
+  {"title": "Science experiment in the lab || تجربة علمية في المختبر", "risk": "medium", "crew_id": "ASTRO-03"},
+  {"title": "Air filter maintenance || صيانة فلاتر الهواء", "risk": "medium", "crew_id": "ASTRO-01"},
+  {"title": "Inventory count || جرد المخزون", "risk": "low", "crew_id": "ASTRO-01"},
+  {"title": "Earth photography || تصوير الأرض", "risk": "low", "crew_id": "ASTRO-03"}
+ ],
+ "sex_notes": {
+  "F": ["Fainting on standing after landing is more common in women astronauts. || الدوخة عند الوقوف بعد الهبوط أكثر شيوعاً عند رائدات الفضاء.",
+        "Urinary tract infections are more common in women astronauts. || التهابات المسالك البولية أكثر شيوعاً عند رائدات الفضاء.",
+        "Heart problems in women more often come with nausea, unusual tiredness, or back, neck or jaw pain. || مشاكل القلب عند النساء تأتي أكثر مع غثيان، تعب غير معتاد، أو ألم بالظهر أو الرقبة أو الفك."],
+  "M": ["All clinically significant spaceflight vision cases so far were in men. || كل حالات تأثر الرؤية المهمة سريرياً حتى الآن كانت عند رجال.",
+        "Hearing sensitivity declines faster with age in men. || حساسية السمع تتراجع مع العمر أسرع عند الرجال."],
+  "src": "NASA and NSBRI, Impact of Sex and Gender on Adaptation to Space, Journal of Women's Health 2014 (small sample: 477 men, 57 women). Heart signs: US Office on Women's Health. || NASA و NSBRI: Impact of Sex and Gender on Adaptation to Space، 2014 (عينة صغيرة: 477 رجلاً و57 امرأة). علامات القلب: US Office on Women's Health."
+ }
+}

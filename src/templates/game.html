@@ -1,0 +1,52 @@
+{% extends "base.html" %}{% block title %}{{ _('Focus game || لعبة التركيز') }}{% endblock %}
+{% block body %}
+<div class="stack">
+  <div><div class="eyebrow">PVT-B · REACTION TEST</div><h1>{{ _('Focus game || لعبة التركيز') }}{% if task %} · {{ task }}{% endif %}</h1>
+  <p class="muted">{{ _('A version of the PVT-B test that NASA uses on the station (Reaction Self-Test). It measures vigilant attention only, not all of cognition. || نسخة من اختبار PVT-B الذي تستخدمه ناسا على المحطة (Reaction Self-Test). يقيس اليقظة والانتباه فقط، وليس كل الإدراك.') }}</p></div>
+  {% if blocked %}
+  <div class="band RED"><div class="dot"></div><div><h2>{{ _('The game is paused || اللعبة متوقفة الآن') }}</h2><p>{{ _('Your status today is high risk. We do not ask someone with a danger symptom to take a focus test. Follow the steps and the Silent Hour first. || حالتك اليوم خطرة. لا نطلب اختبار تركيز من شخص عنده عَرَض خطر. اتبع الخطوات والساعة الصامتة أولاً.') }}</p></div></div>
+  {% else %}
+  <div class="grid g-main" style="align-items:start">
+    <section class="card">
+      <div id="setup" class="stack">
+        <div class="field"><label for="player">{{ _('Player name || اسم اللاعب') }}</label><input id="player" type="text" value="{{ x.crew_id }}"><span class="hint">{{ _('Keep it for the current astronaut, or type your own name to collect real team data. || اتركه للرائد الحالي، أو اكتب اسمك لجمع بيانات حقيقية للفريق.') }}</span></div>
+        <fieldset class="field scale"><legend>{{ _('Before you start: how focused do you feel? || قبل أن تبدأ: كم تشعر أنك مركّز؟') }}</legend><input type="hidden" id="alert" value="7">
+          <div class="scalebtns">{% for i in range(1, 11) %}<label class="chip"><input type="radio" name="alertbtn" value="{{ i }}" {{ 'checked' if i == 7 }} onchange="document.getElementById('alert').value=this.value"><span>{{ i }}</span></label>{% endfor %}</div>
+          <div class="row between hint"><span>{{ _('Very sleepy || نعسان جداً') }}</span><span>{{ _('Fully focused || بكامل تركيزي') }}</span></div></fieldset>
+        <div class="field"><span>{{ _('Test length || مدة الاختبار') }}</span><div class="chips">
+          <a class="btn sm {{ '' if seconds >= 180 else 'ghost' }}" href="/game{% if task %}?task={{ task }}{% endif %}">{{ _('Full test, 3 minutes (validated) || الاختبار الكامل، 3 دقائق (المثبت علمياً)') }}</a>
+          <a class="btn sm {{ 'ghost' if seconds >= 180 else '' }}" href="/game?seconds=45{% if task %}&task={{ task }}{% endif %}">{{ _('Quick estimate, 45 seconds || تقدير سريع، 45 ثانية') }}</a></div></div>
+        <button class="btn big" id="startBtn">{{ _('Start || ابدأ') }} · <span class="num">{{ seconds }}</span> {{ _('s || ث') }}</button>
+        <p class="note">{{ _('When the yellow counter appears, press at once (finger or space bar). Do not press before it appears. Both lengths give a score out of 10. || عند ظهور العدّاد الأصفر اضغط فوراً (بالإصبع أو مفتاح المسافة). لا تضغط قبل ظهوره. المدتان تعطيان تقييماً من 10.') }} {{ _('Played today || لُعبت اليوم') }} <b class="num">{{ played }}/{{ R.max_games_per_day }}</b>.</p>
+      </div>
+      <div id="play" hidden><div class="row between"><span id="clock" class="muted num"></span><span id="hint" class="muted"></span></div><div id="stim" style="margin-top:10px"></div></div>
+      <div id="done" hidden class="stack">
+        <div class="eyebrow">RESULT</div>
+        <div class="grid g2" id="scores" hidden>
+          <div class="tile"><span class="small muted">{{ _('Measured focus || التركيز المقيس') }}</span><div class="v"><span id="gm"></span><small>/10</small></div></div>
+          <div class="tile"><span class="small muted">{{ _('You felt || شعرت') }}</span><div class="v"><span id="gf"></span><small>/10</small></div></div>
+        </div>
+        <div class="gapbar" id="gapbar" hidden style="margin:6px 0 2px"><i id="gi1" style="background:var(--teal)"></i><i id="gi2" style="background:var(--amber)"></i></div>
+        <ul class="clean" id="explain"></ul>
+        <div class="grid g4 keep2" id="tiles"></div>
+        <div class="row"><a class="btn" href="/tasks">{{ _('Tasks and readiness || المهام والجاهزية') }}</a><a class="btn ghost" href="">{{ _('Play again || إعادة') }}</a></div>
+      </div>
+    </section>
+    <section class="card">
+      <h2>{{ _('When is it played? || متى نلعبها؟') }}</h2>
+      <ul class="clean" style="margin-top:8px"><li>• {{ _('Every morning with the check-in (baseline). || كل صباح مع التسجيل اليومي (خط الأساس).') }}</li><li>• {{ _('Before every high-risk task. || قبل كل مهمة خطرة.') }}</li><li>• {{ _('When the readings point to fatigue: short sleep, high stress. || عندما تشير القياسات إلى إرهاق: نوم قليل، توتر عالٍ.') }}</li><li>• {{ _('When the astronaut asks. || عند طلب الرائد.') }}</li></ul>
+      <h3 style="margin-top:14px">{{ _('How is the score calculated? || كيف تُحسب النتيجة؟') }}</h3>
+      <ul class="clean small muted" style="margin-top:6px"><li>{{ _('Speed = 1000 divided by reaction time, compared with your own normal (first two sessions). || السرعة = 1000 ÷ زمن رد الفعل، مقارنة بطبيعتك أنت (أول جلستين).') }}</li><li>{{ _('Every 5% slower than your normal takes one point off 10. || كل 5% أبطأ من طبيعتك تنقص نقطة من 10.') }}</li><li>{{ _('Lapse = a response slower than 355 ms. False start = a press before the signal or faster than 100 ms. || هفوة = رد أبطأ من 355 مللي ثانية. بداية خاطئة = ضغط قبل الإشارة أو أسرع من 100 مللي ثانية.') }}</li></ul>
+      <p class="src" style="margin-top:8px">{{ _('Source: Basner, Mollicone, Dinges 2011 (PVT-B). The game can raise green to yellow only, never lower a red. || المصدر: Basner, Mollicone, Dinges 2011 (PVT-B). اللعبة ترفع الأخضر إلى أصفر فقط ولا تُنزل الأحمر.') }}</p>
+    </section>
+  </div>
+  {% endif %}
+  <section class="card"><div class="head"><h2>{{ _('Saved sessions || الجلسات المحفوظة') }}</h2><span class="tag REAL">REAL</span></div>
+    <div class="scroll"><table><tr><th>{{ _('Player || اللاعب') }}</th><th>{{ _('Trials || المحاولات') }}</th><th>{{ _('Mean (ms) || المتوسط') }}</th><th>{{ _('Lapses || الهفوات') }}</th><th>{{ _('False starts || بدايات خاطئة') }}</th><th>{{ _('Felt || الإحساس') }}</th><th>{{ _('Valid || صالحة') }}</th></tr>
+    {% for g in sessions %}<tr><td>{{ g.player }}</td><td class="num">{{ g.n_trials }}</td><td class="num">{{ g.mean_rt|int if g.mean_rt else '-' }}</td><td class="num">{{ g.lapses if g.lapses is not none else '-' }}</td><td class="num">{{ g.false_starts }}</td><td class="num">{{ g.self_alertness }}/10</td><td>{{ _('Yes || نعم') if g.valid else _('No || لا') }}</td></tr>
+    {% else %}<tr><td colspan="7" class="muted">{{ _('No sessions yet. The first two valid sessions become your personal baseline. || لا توجد جلسات بعد. أول جلستين صالحتين تصبحان طبيعتك الشخصية.') }}</td></tr>{% endfor %}</table></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}{% if not blocked %}<script>const GAME_SECONDS = {{ seconds }}, GAME_TASK = {{ task|tojson }}, GT = {{ _({'wait': 'Wait for the counter… || انتظر العدّاد…', 'tap': 'PRESS! || اضغط!', 'ms': 'Your time (ms) || زمنك (مللي ثانية)', 'early': 'Too early || بدري!', 'left': 'Time left || الوقت المتبقي',
+ 'trials': 'Trials || المحاولات', 'mean': 'Mean time || متوسط الزمن', 'lapses': 'Lapses || الهفوات', 'fs': 'False starts || بدايات خاطئة'})|tojson }};</script><script src="{{ url_for('static', filename='game.js') }}"></script>{% endif %}{% endblock %}

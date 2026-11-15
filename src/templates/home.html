@@ -1,0 +1,120 @@
+{% extends "base.html" %}{% block title %}{{ _('Overview || الرئيسية') }}{% endblock %}
+{% block body %}
+{% set t = x.today %}
+<div class="stack">
+  <div class="band {{ x.color }}">
+    <div class="dot" aria-hidden="true"></div>
+    <div style="flex:1;min-width:240px">
+      <div class="eyebrow">{{ _('Status now || الحالة الآن') }} · {{ x.crew_id }}</div>
+      <h1>{% if x.color == 'GREEN' and x.rest.factors %}{{ _('Stable, but watch sleep and stress || مستقر، لكن انتبه للنوم والتوتر') }}{% elif x.color == 'GREEN' %}{{ _('Stable: everything is within your normal || مستقر: كل شيء ضمن طبيعتك') }}{% elif x.color == 'YELLOW' %}{{ _('Needs follow-up and a re-measure || يحتاج متابعة وإعادة قياس') }}{% else %}{{ _('High risk: act now || خطر: تصرّف الآن') }}{% endif %}</h1>
+      <p class="muted">{{ _('Monitoring || المتابعة') }}: {{ _(R.monitor[x.level]) }}{% if x.last_triage %} · {{ _(x.last_triage.title) }}{% endif %}</p>
+      {% if x.rest.factors %}<div class="row" style="margin-top:6px"><span class="small muted">{{ _('Contributing factors today || عوامل مساهمة اليوم') }}:</span>{% for f in x.rest.factors %}<span class="pill YELLOW">{{ _(f) }}</span>{% endfor %}</div>{% endif %}
+    </div>
+    <div class="row">
+      {% if x.color == 'RED' %}<a class="btn red" href="/silent/start{% if x.last_triage %}?event={{ x.last_triage.id }}{% endif %}">{{ _('Silent Hour || الساعة الصامتة') }}</a>{% endif %}
+      <a class="btn" href="/body">{{ _('I have a symptom || عندي شكوى') }}</a>
+    </div>
+  </div>
+
+  <div class="grid g-main">
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">VITALS · LIVE</div><h2>{{ _('Vital signs || القياسات الحيوية') }}</h2></div><span class="small muted">NEWS2 <b class="num">{{ n.total }}</b></span></div>
+      <div class="grid g3 keep2">
+        {% for k in VITALS %}{% set pts = n.parts.get(k, 0) %}
+        <div class="tile p{{ pts }}">
+          <div class="row between"><span class="small muted">{{ _(VLABEL[k]) }}</span><span class="tag {{ x.vsrc[k] }}">{{ x.vsrc[k] }}</span></div>
+          <div class="v">{{ '%g' % x.vitals[k] }} <small>{{ VUNIT[k] }}</small></div>
+          <span class="src">{% if k in x.base %}{{ _('Your normal || طبيعتك') }}: <span class="num">{{ x.base[k].mean }}</span>{% elif k == 'diastolic_bp' %}{{ _('Shown only, does not change the colour || للعرض فقط، لا يغيّر اللون') }}{% else %}{{ _('Normal range 12 to 20 || المدى الطبيعي 12 إلى 20') }}{% endif %}</span>
+        </div>{% endfor %}
+      </div>
+      <p class="note" style="margin-top:12px"><b>{{ _('Automatic in the real system. || تلقائي في النظام الحقيقي.') }}</b> {{ _('These readings would come continuously from the suit, the smart shirt (Bio-Monitor) and the watch. Here they are simulated. Skin temperature is confirmed with a thermometer before any red decision. || هذه القراءات تأتي باستمرار من البدلة والقميص الذكي (Bio-Monitor) والساعة. هنا هي محاكاة. حرارة الجلد تُؤكَّد بميزان حرارة قبل أي قرار أحمر.') }}</p>
+      <details style="margin-top:10px"><summary class="small" style="cursor:pointer;color:var(--teal-ink)">{{ _('Manual entry (prototype only, overrides the simulation) || إدخال يدوي (للنموذج الأولي فقط، يغطي على المحاكاة)') }}</summary>
+        <form method="post" action="/vitals" class="grid g3" style="margin-top:10px">
+          {% for k in VITALS %}<div class="field"><label for="v{{ k }}" class="small">{{ _(VLABEL[k]) }}</label><input id="v{{ k }}" type="number" step="0.1" name="{{ k }}" value="{{ '%g' % x.vitals[k] }}"></div>{% endfor %}
+          <div class="row" style="grid-column:1/-1"><button class="btn sm">{{ _('Save readings || حفظ القياسات') }}</button><button class="btn sm ghost" name="reset" value="1">{{ _('Back to sensor readings || الرجوع لقراءة الحسّاس') }}</button></div>
+        </form></details>
+    </section>
+
+    <div class="stack">
+      <section class="card sys">
+        <div class="head"><div><div class="eyebrow">EARLY WARNING · TRENDS</div><h2>{{ _('Early warning || إنذار مبكر') }}</h2></div><span class="pill {{ 'YELLOW' if x.trends else 'GREEN' }}">{{ x.trends|length }}</span></div>
+        {% if x.trends %}<ul class="clean">{% for w in x.trends %}<li>• {{ _(w) }}</li>{% endfor %}</ul>
+        {% else %}<p class="muted">{{ _('No drift from your baseline in the last 3 days. || لا يوجد انحراف عن طبيعتك في آخر 3 أيام.') }}</p>{% endif %}
+        <p class="src" style="margin-top:8px">{{ _('Compares the last 3 days with your own baseline, before any complaint. An early notice, not a prediction of illness. || يقارن آخر 3 أيام بطبيعتك الشخصية، قبل أي شكوى. تنبيه مبكر وليس تنبؤاً بمرض.') }}</p>
+      </section>
+      <section class="card">
+        <div class="head"><div><div class="eyebrow">EARTH LINK</div><h2>{{ _('Earth is informed || الأرض على اطلاع') }}</h2></div><span class="tag SIM">SIM</span></div>
+        <p>{% if notice %}{% if notice.color %}<span class="pill {{ notice.color }}">{{ _(COLOR[notice.color]) }}</span> {% endif %}{{ _(notice.title) }}{% else %}{{ _(EARTH[x.level]) }}{% endif %}</p>
+        <p class="src" style="margin-top:6px">{{ _('Every medical event reaches the ground team, whatever its level, so they can prepare before it becomes serious. || كل حدث طبي يصل للفريق الأرضي مهما كانت درجته، ليستعد قبل أن تسوء الحالة.') }}</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="grid g3">
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">SLEEP · 7 NIGHTS</div><h2>{{ _('Sleep || النوم') }}</h2></div><a class="small" href="/sleep">{{ _('Sleep support || دعم النوم') }}</a></div>
+      <div class="bars" role="img" aria-label="{{ _('Sleep hours for the last seven nights || ساعات النوم لآخر سبع ليال') }}">{% for h in x.nights %}<div class="{{ 'vlow' if h < 5 else 'low' if h < 6 }}" style="height:{{ (h / 9 * 100)|round }}%"><span>{{ h }}</span></div>{% endfor %}</div>
+      <div class="grid g3" style="margin-top:12px">
+        <div class="tile"><span class="small muted">{{ _('Last night || آخر ليلة') }}</span><div class="v">{{ x.sleep.last }}</div></div>
+        <div class="tile"><span class="small muted">{{ _('48 h avg || معدل 48 س') }}</span><div class="v">{{ x.sleep.avg48 }}</div></div>
+        <div class="tile"><span class="small muted">{{ _('Debt 7 d || دَين 7 أيام') }}</span><div class="v">{{ x.sleep.debt7 }}</div></div>
+      </div>
+      <p class="src" style="margin-top:8px">{{ _('Goal 7 hours. Sleep hours come from the watch. || الهدف 7 ساعات. ساعات النوم من الساعة.') }} <span class="tag SIM">SIM</span></p>
+    </section>
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">FOCUS · FELT VS MEASURED</div><h2>{{ _('Focus || التركيز') }}</h2></div><span class="tag {{ x.focus.src }}">{{ x.focus.src }}</span></div>
+      <div class="row between"><span>{{ _('You feel || تشعر') }} <b class="num">{{ x.focus.felt10 }}/10</b></span><span>{{ _('Measured || القياس') }} <b class="num">{{ x.focus.measured10 }}/10</b></span></div>
+      <div class="gapbar" style="margin:14px 0" role="img" aria-label="{{ _('Gap between feeling and measurement || الفجوة بين الإحساس والقياس') }}"><i style="inset-inline-start:{{ x.focus.felt10 * 10 }}%;background:var(--teal)"></i><i style="inset-inline-start:{{ x.focus.measured10 * 10 }}%;background:var(--amber)"></i></div>
+      {% if x.focus.blind %}<p class="c-YELLOW"><b>{{ _('Blind spot: || نقطة عمياء:') }}</b> {{ _('you feel better than the test measures. Do not rely on your feeling for precise tasks today. || تشعر أنك أفضل مما يقيسه الاختبار. لا تعتمد على إحساسك في المهام الدقيقة اليوم.') }}</p>
+      {% elif x.focus.low %}<p class="c-YELLOW">{{ _('Your focus is slower than your normal by || تركيزك أبطأ من طبيعتك بـ') }} <span class="num">{{ x.focus.drop_pct }}%</span></p>
+      {% else %}<p class="muted">{{ _('Your focus is within your normal. || تركيزك ضمن طبيعتك.') }}</p>{% endif %}
+      <div class="row" style="margin-top:10px"><a class="btn ghost sm" href="/game">{{ _('Play now || العب الآن') }}</a><span class="src">{{ _('Played today || لُعبت اليوم') }} <span class="num">{{ games }}/{{ R.max_games_per_day }}</span></span></div>
+    </section>
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">MIND · SELF REPORT</div><h2>{{ _('Stress and mood || التوتر والمزاج') }}</h2></div><a class="small" href="/mind">{{ _('Support || الدعم') }}</a></div>
+      <div class="grid g2">
+        <div class="tile"><span class="small muted">{{ _('Stress || التوتر') }}</span><div class="v {{ 'c-YELLOW' if x.stress.status != 'OK' }}">{{ t.stress_self_1to10|int }}<small>/10</small></div></div>
+        <div class="tile"><span class="small muted">{{ _('Mood || المزاج') }}</span><div class="v">{{ t.mood_self_1to10|int }}<small>/10</small></div></div>
+        <div class="tile"><span class="small muted">{{ _('Loneliness || الوحدة') }}</span><div class="v {{ 'c-YELLOW' if x.lonely_high }}">{{ t.loneliness_1to10|int }}<small>/10</small></div></div>
+        <div class="tile"><span class="small muted">{{ _('Workload || ضغط العمل') }}</span><div class="v">{{ t.workload_1to10|int }}<small>/10</small></div></div>
+      </div>
+      <p class="src" style="margin-top:8px">{% if x.stress.status == 'PERSISTENT' %}{{ _('High stress for 3 days: a session with ground support is suggested. || توتر عالٍ منذ 3 أيام: يُقترح جلسة مع الدعم الأرضي.') }}{% elif x.stress.status == 'HIGH' %}{{ _('High stress today. || توتر عالٍ اليوم.') }}{% else %}{{ _('Within the usual range. || ضمن المعتاد.') }}{% endif %}</p>
+    </section>
+  </div>
+
+  <div class="grid g3">
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">SCHEDULE</div><h2>{{ _('Today || مواعيد اليوم') }}</h2></div></div>
+      <ul class="clean">
+        <li class="row between"><span>{{ _('Morning check-in and game || تسجيل الصباح واللعبة') }}</span>{% if x.checkins.morning %}<span class="pill GREEN">{{ _('Done || تم') }}</span>{% else %}<a class="btn sm" href="/checkin">{{ _('Start || ابدأ') }}</a>{% endif %}</li>
+        <li class="row between"><span>{{ _('Evening check-in || تسجيل المساء') }}</span>{% if x.checkins.evening %}<span class="pill GREEN">{{ _('Done || تم') }}</span>{% else %}<a class="btn sm ghost" href="/checkin#evening">{{ _('Start || ابدأ') }}</a>{% endif %}</li>
+        <li class="row between"><span>{{ _('Focus game before a high-risk task || لعبة التركيز قبل مهمة خطرة') }}</span><a class="btn sm ghost" href="/tasks">{{ _('Tasks || المهام') }}</a></li>
+      </ul>
+    </section>
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">TOMORROW · DAY {{ x.day + 1 }}</div><h2>{{ _('Tomorrow plan || خطة الغد') }}</h2></div><a class="small" href="/tomorrow">{{ _('Open || فتح') }}</a></div>
+      <ul class="clean">{% for i in plan['items'][:3] %}<li><b>{{ _(i.t) }}:</b> {{ _(i.a) }}</li>{% endfor %}</ul>
+    </section>
+    <section class="card">
+      <div class="head"><div><div class="eyebrow">PROFILE · {{ x.crew_id }}</div><h2>{{ _('Personal profile || الملف الشخصي') }}</h2></div><span class="tag">{{ _('Female || أنثى') if x.sex == 'F' else _('Male || ذكر') }}</span></div>
+      <ul class="clean small">{% for s in SUP.sex_notes[x.sex] %}<li>• {{ _(s) }}</li>{% endfor %}</ul>
+      <p class="src" style="margin-top:8px">{{ _('Limits are the same for everyone (NEWS2 does not differ by sex). The personal baseline is what adapts to each person. || الحدود واحدة للجميع (NEWS2 لا يفرّق بين الجنسين). الطبيعة الشخصية هي التي تتكيف مع كل شخص.') }} {{ _(SUP.sex_notes.src) }}</p>
+    </section>
+  </div>
+
+  <div class="grid g-main">
+    <section class="card">
+      <div class="head"><h2>{{ _('Recently saved || آخر ما حُفظ') }}</h2><a class="small" href="/log">{{ _('Full log || السجل الكامل') }}</a></div>
+      <ul class="clean">{% for e in recent %}<li class="row between"><span>{% if e.color %}<span class="pill {{ e.color }}">{{ _(COLOR[e.color]) }}</span> {% endif %}{{ _(e.title) }}</span><span class="small muted num">D{{ e.mission_day }} · {{ e.ts|clock }}</span></li>{% else %}<li class="muted">{{ _('Nothing saved yet. || لا يوجد شيء محفوظ بعد.') }}</li>{% endfor %}</ul>
+    </section>
+    <section class="card">
+      <div class="head"><h2>{{ _('Demo scenarios || سيناريوهات العرض') }}</h2><span class="tag SIM">SIM</span></div>
+      <div class="stack" style="gap:8px">
+        <a class="btn ghost sm wrap" href="/scenario/green" style="border-color:var(--green);color:var(--green)">{{ _('Stable · ASTRO-01 day 50 · mild headache after a week of good sleep || مستقر · ASTRO-01 يوم 50 · صداع خفيف بعد أسبوع نوم جيد') }}</a>
+        <a class="btn ghost sm wrap" href="/scenario/yellow" style="border-color:var(--amber);color:var(--amber)">{{ _('Follow-up · ASTRO-02 day 76 · palpitations and dizziness with short sleep || متابعة · ASTRO-02 يوم 76 · خفقان ودوخة مع قلة نوم') }}</a>
+        <a class="btn ghost sm wrap" href="/scenario/red" style="border-color:var(--red);color:var(--red)">{{ _('High risk · ASTRO-04 day 124 · chest pain and dangerous readings || خطر · ASTRO-04 يوم 124 · ألم صدر وقياسات خطرة') }}</a>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

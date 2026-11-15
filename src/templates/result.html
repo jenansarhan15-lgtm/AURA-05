@@ -1,0 +1,96 @@
+{% extends "base.html" %}{% block title %}{{ _('Assessment result || نتيجة التقييم') }}{% endblock %}
+{% block body %}
+{% set red = res.color == 'RED' %}
+<div class="stack">
+  <div class="band {{ res.color }}">
+    <div class="dot" aria-hidden="true"></div>
+    <div style="flex:1;min-width:240px">
+      <div class="eyebrow">{{ _(ev.title) }} · {{ ev.crew_id }} · D{{ ev.mission_day }}{% if d.round %} · {{ _('re-measure || إعادة القياس') }} {{ d.round }}{% endif %}</div>
+      <h1>{{ _(d.note) if d.note else _(res.message) }}</h1>
+      <p class="muted">{{ _('Monitoring || المتابعة') }}: {{ _(res.monitor) }}</p>
+    </div>
+    <button type="button" class="btn ghost sm" id="readBtn">{{ _('Read aloud || اقرأ لي') }}</button>
+  </div>
+
+  {% if red %}
+  <section class="card" style="border-color:var(--red)" id="autoCard">
+    <div class="row between"><div><div class="eyebrow">AUTOMATIC SOS</div><h2>{{ _('The summary is sent to Earth automatically || الملخص يُرسَل للأرض تلقائياً') }}</h2>
+      <p class="muted">{{ _('You do not need to press anything. The Silent Hour opens in || لا تحتاج أن تضغط شيئاً. الساعة الصامتة تُفتح بعد') }} <b class="num" id="autoN">{{ R.auto_sos_seconds }}</b> {{ _('seconds. || ثوانٍ.') }}</p></div>
+      <div class="row"><a class="btn red" href="/silent/start?event={{ ev.id }}" id="autoGo">{{ _('Open now || افتح الآن') }}</a><button type="button" class="btn ghost" id="autoCancel">{{ _('Cancel (false alarm) || إلغاء (إنذار خاطئ)') }}</button></div></div>
+  </section>
+  {% endif %}
+
+  <div class="grid g-main" style="align-items:start">
+    <div class="stack">
+      {% for s in syms %}
+      <section class="card">
+        <div class="head"><h2>{{ _('Act now || تصرّف الآن') if red else _('What to do || ماذا تفعل') }}: {{ _(s.name) }}</h2><span class="tag IFRC">{{ s.source }}</span></div>
+        <ol class="steps {{ 'red' if red }}">{% for st in (s.red_steps if red and s.red_steps else s.steps or s.red_steps) %}<li>{{ _(st) }}</li>{% endfor %}</ol>
+        {% if s.note %}<p class="note" style="margin-top:10px"><b>{{ _('Space note: || ملاحظة فضائية:') }}</b> {{ _(s.note) }}</p>{% endif %}
+      </section>
+      {% else %}
+      <section class="card"><h2>{{ _('No symptom entered || لم يُدخَل عَرَض') }}</h2><p class="muted">{{ _('The assessment is based on vital signs and context only. || التقييم مبني على القياسات الحيوية والسياق فقط.') }}</p></section>
+      {% endfor %}
+      <p class="note"><b>{{ _('Note: || تنبيه:') }}</b> {{ _('The steps are summarised from the IFRC 2020 guidelines written for Earth and need adaptation by the flight surgeon for microgravity. || الخطوات ملخّصة من إرشادات IFRC 2020 الأرضية وتحتاج تكييفاً من طبيب الرحلة لظروف انعدام الجاذبية.') }} {{ _(KB.medication_rule) }}</p>
+
+      {% if res.color == 'YELLOW' %}
+      <section class="card" id="loop">
+        <div class="head"><div><div class="eyebrow">RE-MEASURE LOOP</div><h2>{{ _('Re-measure loop || حلقة إعادة القياس') }}</h2></div><span class="small"><a href="?speed=1">{{ _('Real time || وقت حقيقي') }}</a> · <a href="?speed=60">{{ _('Demo speed x60 || تسريع العرض ×60') }}</a></span></div>
+        <div class="grid g2" style="align-items:center">
+          <div><div class="muted small">{{ _('Re-measure in || إعادة القياس بعد') }}</div><div class="count" id="cd">--:--</div><p class="src">{{ _('Yellow is never left open: better means green, no improvement means one level up. || الأصفر لا يُترك مفتوحاً: تحسّن يعني أخضر، وبلا تحسّن درجة أعلى.') }}</p></div>
+          <div class="stack" style="gap:8px"><a class="btn" href="/calm?back=/result/{{ ev.id }}">{{ _('3-minute breathing session || جلسة تنفس 3 دقائق') }}</a>
+            {% if res.factors %}<a class="btn ghost" href="/game">{{ _('Focus game: compare feeling and measurement || لعبة التركيز: قارن إحساسك بقياسك') }}</a>{% endif %}</div>
+        </div>
+        <form method="post" action="/remeasure/{{ ev.id }}" class="stack" style="margin-top:14px" id="rem">
+          <div class="row between"><h3>{{ _('New readings || القياسات الجديدة') }}</h3><span class="tag AUTO">{{ _('AUTOMATIC FROM SENSORS IN THE REAL SYSTEM || تلقائية من الحسّاسات في النظام الحقيقي') }}</span></div>
+          <div class="grid g3">{% for k in VITALS %}<div class="field"><label class="small" for="r{{ k }}">{{ _(VLABEL[k]) }}</label><input id="r{{ k }}" type="number" step="0.1" name="{{ k }}" value="{{ '%g' % d.vitals[k] }}"></div>{% endfor %}</div>
+          <div class="yn"><span>{{ _('Have the symptoms improved? || هل تحسّنت الأعراض؟') }}</span><div class="chips"><label class="chip"><input type="radio" name="better" value="1" checked><span>{{ _('Yes, better || نعم، تحسّنت') }}</span></label><label class="chip danger"><input type="radio" name="better" value="0"><span>{{ _('No || لا') }}</span></label></div></div>
+          <button class="btn amber" id="remBtn">{{ _('Record the re-measure || سجّل إعادة القياس') }}</button>
+        </form>
+      </section>
+      {% endif %}
+    </div>
+
+    <div class="stack">
+      <section class="card">
+        <div class="eyebrow">WHY THIS LEVEL</div><h2>{{ _('Why this level? || لماذا هذا المستوى؟') }}</h2>
+        {% if res.reasons %}<ul class="clean" style="margin-top:8px">{% for r in res.reasons %}<li>• {{ _(r) }}</li>{% endfor %}</ul>{% else %}<p class="muted">{{ _('No danger signs in the symptoms or the vital signs. || لا توجد علامات خطر في الأعراض أو القياسات.') }}</p>{% endif %}
+        {% if res.factors %}<h3 style="margin-top:14px">{{ _('Possible contributing factors || عوامل مساهمة محتملة') }}</h3>
+        <ul class="clean" style="margin-top:6px">{% for f in res.factors %}<li><span class="pill YELLOW" style="white-space:normal">{{ _(f) }}</span></li>{% endfor %}</ul>
+        <p class="src" style="margin-top:6px">{{ _('Sleep and stress are contributing factors, not necessarily the cause. They can raise green to yellow only, and never lower a red. || النوم والتوتر عوامل مساهمة وليست بالضرورة السبب. ترفع الأخضر إلى أصفر فقط، ولا تُنزل الأحمر أبداً.') }}</p>{% endif %}
+      </section>
+      <section class="card">
+        <div class="head"><div><div class="eyebrow">EARTH LINK</div><h2>{{ _('Earth is informed || الأرض على اطلاع') }}</h2></div><span class="tag SIM">SIM</span></div>
+        <p>{{ _(EARTH[d.level]) }}</p>
+        <p class="src" style="margin-top:6px">{{ _('Simulated. In the real system every medical event is reported so the ground team can prepare early. || محاكاة. في النظام الحقيقي كل حدث طبي يُبلَّغ ليستعد الفريق الأرضي مبكراً.') }}</p>
+      </section>
+      <section class="card">
+        <div class="head"><div><div class="eyebrow">VITALS · NEWS2</div><h2>{{ _('Vital signs || القياسات') }}</h2></div><b class="num">{{ res.news2.total }}</b></div>
+        <table>{% for k in VITALS %}<tr><td>{{ _(VLABEL[k]) }}</td><td class="num">{{ '%g' % d.vitals[k] }} {{ VUNIT[k] }}</td><td>{% if k in res.news2.parts %}<span class="pill {{ 'RED' if res.news2.parts[k] == 3 else 'YELLOW' if res.news2.parts[k] else 'GREEN' }} num">{{ res.news2.parts[k] }}</span>{% else %}-{% endif %}</td></tr>{% endfor %}
+          <tr><td>{{ _('Alertness || الوعي') }}</td><td>{{ _('Alert || صاحٍ') if d.alert else _('Confused || مشوّش') }}</td><td><span class="pill {{ 'GREEN' if d.alert else 'RED' }} num">{{ 0 if d.alert else 3 }}</span></td></tr></table>
+        <p class="src" style="margin-top:6px">{{ _('NEWS2 is an Earth hospital scale (RCP 2017), not validated for space. Diastolic pressure is shown only. || NEWS2 مقياس مستشفيات أرضي (RCP 2017) وليس معتمداً للفضاء. الانبساطي للعرض فقط.') }}</p>
+        {% if x.sex == 'F' and ('chest_pain' in d.chosen or 'nausea' in d.chosen or 'fatigue' in d.chosen or 'back_pain' in d.chosen) %}<p class="note" style="margin-top:8px">{{ _(SUP.sex_notes.F[2]) }} (US Office on Women's Health)</p>{% endif %}
+      </section>
+      <div class="row"><a class="btn ghost" href="/tomorrow">{{ _('Tomorrow plan || خطة الغد') }}</a><a class="btn ghost" href="/body">{{ _('New complaint || شكوى جديدة') }}</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}{% set red = res.color == 'RED' %}
+<script>
+const READ = {{ _([d.note or res.message] + (syms|map(attribute=('red_steps' if red else 'steps'))|sum(start=[])))|tojson }}, STEPW = {{ _('Step || الخطوة')|tojson }};
+function readAll(i) { i = i || 0; if (i < READ.length) Voice.speak((i ? STEPW + " " + i + ". " : "") + READ[i], () => readAll(i + 1)); }
+document.getElementById("readBtn").onclick = () => { Voice.stop(); readAll(0); };
+setTimeout(() => readAll(0), 500);
+{% if red and auto %}
+let n = {{ R.auto_sos_seconds }}, stopAuto = false;
+const tm = setInterval(() => { if (stopAuto) return clearInterval(tm); n--; document.getElementById("autoN").textContent = Math.max(0, n); if (n <= 0) { clearInterval(tm); location.href = document.getElementById("autoGo").getAttribute("href"); } }, 1000);
+document.getElementById("autoCancel").onclick = () => { stopAuto = true; document.getElementById("autoCard").querySelector("p").textContent = {{ _('Automatic sending cancelled. You can still open the Silent Hour yourself. || أُلغي الإرسال التلقائي. تستطيع فتح الساعة الصامتة بنفسك.')|tojson }}; };
+{% endif %}
+{% if res.color == 'YELLOW' %}
+const total = {{ R.remeasure_minutes * 60 }}, speed = {{ speed }}, started = Date.now(), NOWTXT = {{ _('It is time: record the re-measure now || حان الوقت: سجّل إعادة القياس الآن')|tojson }};
+(function tick() { const left = Math.max(0, total - (Date.now() - started) / 1000 * speed), m = Math.floor(left / 60), s = Math.floor(left % 60);
+  document.getElementById("cd").textContent = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  if (left <= 0) { document.getElementById("cd").style.color = "var(--amber)"; document.getElementById("remBtn").textContent = NOWTXT; Voice.speak(NOWTXT); return; } setTimeout(tick, 250); })();
+{% endif %}
+</script>{% endblock %}

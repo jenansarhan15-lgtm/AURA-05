@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}{{ _('Log || السجل') }}{% endblock %}
+{% block body %}
+{% set KIND = {'triage':'Complaint || شكوى','remeasure':'Re-measure || إعادة قياس','checkin':'Check-in || تسجيل يومي','vitals':'Vitals || قياسات','game':'Game || لعبة','calm':'Breathing || تنفس','sleep':'Sleep || نوم','mind':'Mind || نفسي','earth':'Earth link || اتصال أرضي','team':'Team || فريق','swap':'Tasks || مهام','plan':'Plan || خطة','silent':'Silent Hour || ساعة صامتة'} %}
+<div class="stack">
+  <div class="row between"><div><div class="eyebrow">SAVED SESSIONS</div><h1>{{ _('Log || السجل') }}</h1><p class="muted">{{ _('Every assessment and every session is saved locally with its day and time. || كل تقييم وكل جلسة يُحفظ محلياً باليوم والوقت.') }}</p></div>
+    <div class="row"><a class="btn sm {{ '' if who != 'all' else 'ghost' }}" href="/log">{{ S.crew }}</a><a class="btn sm {{ '' if who == 'all' else 'ghost' }}" href="/log?who=all">{{ _('Whole crew || كل الطاقم') }}</a></div></div>
+  <section class="card"><div class="scroll"><table>
+    <tr><th>{{ _('Day || اليوم') }}</th><th>{{ _('Time || الوقت') }}</th><th>{{ _('Astronaut || الرائد') }}</th><th>{{ _('Type || النوع') }}</th><th>{{ _('Level || المستوى') }}</th><th>{{ _('Title || العنوان') }}</th><th></th></tr>
+    {% for e in events %}<tr><td class="num">{{ e.mission_day }}</td><td class="num">{{ e.ts|clock }}</td><td class="num">{{ e.crew_id }}</td><td><span class="tag">{{ _(KIND.get(e.kind, e.kind)) }}</span></td>
+      <td>{% if e.color %}<span class="pill {{ e.color }}">{{ _(COLOR[e.color]) }}</span>{% endif %}</td><td>{{ _(e.title) }}</td>
+      <td>{% if e.kind in ('triage', 'remeasure') %}<a href="/result/{{ e.id }}?auto=0">{{ _('Open || فتح') }}</a>{% elif e.kind == 'silent' %}<a href="/silent/{{ e.detail.silent_id }}">{{ _('Open || فتح') }}</a>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="7" class="muted">{{ _('Nothing saved yet. Start from the daily check-in or report a symptom. || لا يوجد شيء محفوظ بعد. ابدأ من التسجيل اليومي أو تسجيل شكوى.') }}</td></tr>{% endfor %}
+  </table></div></section>
+  <p class="src">{{ _('Storage: a local SQLite file (data/aegis.db). Nothing leaves the device. || التخزين: ملف SQLite محلي (data/aegis.db). لا شيء يخرج من الجهاز.') }}</p>
+</div>
+{% endblock %}

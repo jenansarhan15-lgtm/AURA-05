@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% block title %}{{ _('Team support || دعم الفريق') }}{% endblock %}
+{% block body %}
+{% set CV = {'GREEN': 'green', 'YELLOW': 'amber', 'RED': 'red'} %}
+<div class="stack">
+  <div><div class="eyebrow">TEAM SUPPORT · ANONYMOUS INDEX</div><h1>{{ _('Team support: the fifth crew member || دعم الفريق: العضو الخامس') }}</h1><p class="muted">{{ _('An anonymous index of the crew: counts only, no names and no personal data. || مؤشر مجهول لحالة الطاقم: أعداد فقط، بلا أسماء ولا بيانات شخصية.') }}</p></div>
+  {% if sent %}<div class="note"><b>{{ _('Done. The suggestion was recorded for the commander (simulated). || تم. سُجّل الاقتراح للقائد (محاكاة).') }}</b></div>{% endif %}
+  <div class="grid g2" style="align-items:start">
+    <section class="card">
+      <div class="row" style="align-items:baseline"><div class="big c-{{ worst }}">{{ counts.YELLOW + counts.RED }}/{{ n }}</div><b>{{ _('need rest or are not available today || يحتاجون راحة أو غير متاحين اليوم') }}</b></div>
+      <div class="row" style="margin-top:12px;gap:6px" role="img" aria-label="{{ _('Crew status distribution || توزيع حالة الطاقم') }}">{% for b in ['GREEN','YELLOW','RED'] %}{% for i in range(counts[b]) %}<div style="flex:1;height:18px;border-radius:5px;background:var(--{{ CV[b] }})"></div>{% endfor %}{% endfor %}</div>
+      <div class="row between small muted" style="margin-top:6px"><span><b class="c-GREEN num">{{ counts.GREEN }}</b> {{ _('ready || جاهز') }}</span><span><b class="c-YELLOW num">{{ counts.YELLOW }}</b> {{ _('need rest || يحتاج راحة') }}</span><span><b class="c-RED num">{{ counts.RED }}</b> {{ _('not available || غير متاح') }}</span></div>
+      <div class="eyebrow" style="margin-top:18px">LAST 7 DAYS</div>
+      <div class="row" style="align-items:flex-end;gap:10px;margin-top:8px;flex-wrap:nowrap">{% for w in week %}<div style="flex:1;display:flex;flex-direction:column;gap:3px">
+        {% for b in w.bands|reverse %}<div style="height:15px;border-radius:4px;background:var(--{{ CV[b] }})"></div>{% endfor %}<div class="small muted num" style="text-align:center">{{ w.day }}</div></div>{% endfor %}</div>
+      <div class="grid g2" style="margin-top:14px">
+        <div class="tile"><span class="small muted">{{ _('Average "my relationship with the team" || متوسط «علاقتي مع الفريق»') }}</span><div class="v">{{ team_avg }}<small>/5</small></div></div>
+        <div class="tile"><span class="small muted">{{ _('Average loneliness || متوسط الشعور بالوحدة') }}</span><div class="v">{{ lonely_avg }}<small>/10</small></div></div>
+      </div>
+    </section>
+    <div class="stack">
+      <section class="card sys">
+        <div class="eyebrow">SYSTEM SUGGESTION · FOR THE COMMANDER</div>
+        <ol class="steps" style="margin-top:8px">{% for s in SUP.team.suggestions[worst] %}<li>{{ _(s) }}</li>{% endfor %}</ol>
+        <form method="post" style="margin-top:12px"><button class="btn">{{ _('Send the suggestion to the commander || أرسل الاقتراح للقائد') }}</button></form>
+      </section>
+      <section class="card">
+        <div class="head"><h2>{{ _('Team skills at NASA || مهارات الفريق عند ناسا') }}</h2><span class="tag NASA">NASA Expeditionary Skills</span></div>
+        <div class="chips">{% for s in SUP.team.skills %}<span class="tag" style="font-size:12.5px;padding:5px 10px">{{ _(s) }}</span>{% endfor %}</div>
+        <h3 style="margin-top:14px">{{ _('Tension between crew members? || توتر بين الأعضاء؟') }}</h3>
+        <ul class="clean" style="margin-top:6px"><li>• {{ _('A short distance first, then a calm talk (IFRC calming techniques). || مسافة قصيرة أولاً، ثم حديث هادئ (IFRC: تقنيات التهدئة).') }}</li><li>• {{ _('Respect for different views (NASA expeditionary mindset). || احترام اختلاف وجهات النظر (NASA: Expeditionary mindset).') }}</li><li>• {{ _('If it continues, the commander asks for human support from Earth for the crew. || إن استمر، القائد يطلب دعماً بشرياً من الأرض للطاقم.') }}</li></ul>
+        <p class="note" style="margin-top:10px"><b>{{ _('Human decision: || تدخل بشري:') }}</b> {{ _('the system only suggests. Any decision about people is taken by the commander or the ground support team. || النظام يقترح فقط. أي قرار يخص الأشخاص يتخذه القائد أو فريق الدعم الأرضي.') }}</p>
+      </section>
+    </div>
+  </div>
+  <p class="src">{{ _('Matching NASA risk: Risk of Inadequate Teamwork. Closest study: ARCHeR on Artemis II (sleep, activity, wellbeing, performance, crew interaction). We do not claim ARCHeR contains this index. || خطر ناسا المقابل: Risk of Inadequate Teamwork. أقرب دراسة: ARCHeR على Artemis II. لا ندّعي أن ARCHeR تتضمن هذا المؤشر.') }}</p>
+</div>
+{% endblock %}

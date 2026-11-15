@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="{{ LANG }}" dir="{{ 'rtl' if LANG == 'ar' else 'ltr' }}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{% endblock %} · AURA-5</title>
+<link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set p = request.path %}
+{% macro nav(href, label) %}<a href="{{ href }}" class="{{ 'on' if (p == href or (href != '/' and p.startswith(href))) }}">{{ _(label) }}</a>{% endmacro %}
+<div class="app">
+  <aside class="side">
+    <a class="brand" href="/"><img src="{{ url_for('static', filename='logo.png') }}" alt="AURA-5 logo"><div><b>AURA-5</b><span>{{ _('The fifth crew member || العضو الخامس في الطاقم') }}</span></div></a>
+    <nav class="nav" aria-label="{{ _('Main menu || القائمة الرئيسية') }}">
+      <div class="grp">{{ _('Today || اليوم') }}</div>
+      {{ nav('/', 'Overview || الرئيسية') }}
+      {{ nav('/checkin', 'Daily check-in || التسجيل اليومي') }}
+      {{ nav('/body', 'Report a symptom || تسجيل شكوى') }}
+      {{ nav('/game', 'Focus game || لعبة التركيز') }}
+      <div class="grp">{{ _('Support || الدعم') }}</div>
+      {{ nav('/sleep', 'Sleep support || دعم النوم') }}
+      {{ nav('/mind', 'Psychological support || الدعم النفسي') }}
+      {{ nav('/team', 'Team support || دعم الفريق') }}
+      <div class="grp">{{ _('Mission || المهمة') }}</div>
+      {{ nav('/tasks', 'Tasks and readiness || المهام والجاهزية') }}
+      {{ nav('/tomorrow', 'Tomorrow plan || خطة الغد') }}
+      {{ nav('/log', 'Log || السجل') }}
+      <a class="sos" href="/silent/start">{{ _('Silent Hour · SOS || الساعة الصامتة · SOS') }}</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="top noprint">
+      <div class="mission">
+        <div class="ring" style="--p:{{ S.pct }}">{{ S.pct }}%</div>
+        <div>
+          <div class="eyebrow">{{ _('Mission day || يوم المهمة') }}</div>
+          <b>{{ _('Day || اليوم') }} <span class="num">{{ S.day }}</span> {{ _('of || من') }} <span class="num">{{ S.total }}</span></b>
+          <div class="tagrow"><span class="tag">{{ _(COMMS[S.loc].name) }}</span><span class="tag">{{ S.crew }} · {{ _(S.role) }}</span>{% if S.event %}<span class="tag MANUAL">{{ _(S.event) }}</span>{% endif %}</div>
+        </div>
+      </div>
+      <form class="demo" method="post" action="/set" id="demoForm">
+        <input type="hidden" name="next" value="{{ request.path if request.method == 'GET' else '/' }}">
+        <label>{{ _('Astronaut || الرائد') }}<select name="crew" onchange="this.form.submit()">{% for c in CREW %}<option value="{{ c.crew_id }}" {{ 'selected' if c.crew_id == S.crew }}>{{ c.crew_id }} · {{ _(ROLE[c.role]) }}</option>{% endfor %}</select></label>
+        <label>{{ _('Day || اليوم') }}<input type="number" name="day" min="15" max="{{ S.total }}" value="{{ S.day }}" style="width:74px" onchange="this.form.submit()"></label>
+        <label>{{ _('Distance from Earth || البعد عن الأرض') }}<select name="loc" onchange="this.form.submit()">{% for k, c in COMMS.items() %}<option value="{{ k }}" {{ 'selected' if k == S.loc }}>{{ _(c.name) }}</option>{% endfor %}</select></label>
+        <span class="tag SIM">{{ _('Demo controls || تحكّم العرض') }}</span>
+      </form>
+      <div class="row" style="align-items:center">
+        <button type="button" class="spk" id="spk" aria-pressed="true"></button>
+        <div class="langsw" role="group" aria-label="Language"><a href="/lang/en?next={{ request.path if request.method == 'GET' else '/' }}" class="{{ 'on' if LANG == 'en' }}">EN</a><a href="/lang/ar?next={{ request.path if request.method == 'GET' else '/' }}" class="{{ 'on' if LANG == 'ar' }}">عربي</a></div>
+      </div>
+    </div>
+    {% block body %}{% endblock %}
+  </main>
+</div>
+
+<button class="about-btn" onclick="document.getElementById('about').showModal()">{{ _('About this prototype || عن النموذج') }}</button>
+<div class="proto">{{ _('PROTOTYPE · SIMULATED DATA · NOTHING IS TRANSMITTED || نموذج أولي · بيانات محاكاة · لا يُرسَل شيء') }}</div>
+<dialog id="about" aria-labelledby="about-h">
+  <div class="stack">
+    <div class="row between"><h2 id="about-h">{{ _('About AURA-5 || عن AURA-5') }}</h2><button class="btn sm ghost" onclick="this.closest('dialog').close()">{{ _('Close || إغلاق') }}</button></div>
+    <p><b>{{ _('What is it? || ما هو؟') }}</b> {{ _('A health companion for the crew: psychological support, sleep support, and a nurse-like assistant. It assesses the situation from symptoms and vital signs, sets the level of urgency, and gives first-aid instructions until the flight surgeon replies. It does not replace the doctor and does not suggest drugs. || مرافق صحي للطاقم: داعم نفسي، داعم نوم، ومساعد بدور الممرّض. يقيّم الحالة من الأعراض والمؤشرات الحيوية، يحدد درجة الخطورة، ويعطي تعليمات الإسعاف الأولي حتى يرد الطبيب الأرضي. لا يحل محل الطبيب ولا يقترح أدوية.') }}</p>
+    <div class="note"><b>{{ _('Prototype || نموذج أولي') }}.</b> {{ _('Built for NASA Space Apps 2026. Every numeric limit is a first value kept in one file (data/rules.json) and needs medical review before any real use. || مبني لمسابقة NASA Space Apps 2026. كل الحدود الرقمية قيم أولية في ملف واحد (data/rules.json) وتحتاج مراجعة طبية قبل أي استخدام حقيقي.') }}</div>
+    <div class="scroll"><table>
+      <tr><th>{{ _('Source || المصدر') }}</th><th>{{ _('Meaning || المعنى') }}</th><th>{{ _('Where || أين يظهر') }}</th></tr>
+      <tr><td><span class="tag SIM">SIM</span></td><td>{{ _('Reading from a simulated sensor. In the real system this comes automatically from the suit, the smart shirt and the watch. || قراءة من حسّاس محاكى. في النظام الحقيقي تأتي تلقائياً من البدلة والقميص الذكي والساعة.') }}</td><td>{{ _('Vital signs, sleep hours || القياسات الحيوية، ساعات النوم') }}</td></tr>
+      <tr><td><span class="tag MANUAL">MANUAL</span></td><td>{{ _('Typed or spoken by the astronaut. It overrides the simulation. || إدخال من الرائد بالكتابة أو الصوت، ويغطي على المحاكاة.') }}</td><td>{{ _('Check-in, symptoms, manual readings || التسجيل اليومي، الأعراض، القياسات اليدوية') }}</td></tr>
+      <tr><td><span class="tag REAL">REAL</span></td><td>{{ _('A real measurement taken inside the browser. || قياس حقيقي يحصل داخل المتصفح.') }}</td><td>{{ _('Focus game (reaction time) || لعبة التركيز (زمن رد الفعل)') }}</td></tr>
+    </table></div>
+    <p><b>{{ _('Storage || التخزين') }}:</b> {{ _('One local file (SQLite) inside the project. Sending to Earth and the reply from Earth are simulations: nothing leaves this device. || ملف محلي واحد (SQLite) داخل المشروع. الإرسال للأرض ورد الأرض محاكاة: لا شيء يخرج من هذا الجهاز.') }}</p>
+    <p><b>{{ _('Earth is always informed || الأرض دائماً على اطلاع') }}:</b> {{ _('Green goes into the daily report, yellow sends an early notice so the ground team can prepare, red sends an SOS summary automatically. || الأخضر يدخل في التقرير اليومي، الأصفر يرسل تنبيهاً مبكراً ليستعد الفريق الأرضي، والأحمر يرسل ملخص SOS تلقائياً.') }}</p>
+    <p><b>{{ _('Voice || الصوت') }}:</b> {{ _('The system reads questions and steps aloud and understands a spoken complaint through keywords, then confirms what it understood before any assessment. In this prototype speech recognition uses the browser service (Chrome or Edge) and needs a connection. A flight system would run recognition on board. || النظام يقرأ الأسئلة والخطوات بصوت مسموع ويفهم الشكوى المنطوقة بكلمات مفتاحية، ثم يؤكد ما فهمه قبل أي تقييم. في النموذج الأولي التعرّف على الكلام يستخدم خدمة المتصفح (Chrome أو Edge) ويحتاج اتصالاً. في نظام الرحلة يكون التعرّف على متن المركبة.') }}</p>
+    <p><b>{{ _('Scientific basis || الأساس العلمي') }}:</b> {{ _('IFRC first aid guidelines 2020, the NEWS2 scale (an Earth tool), the PVT-B test used by NASA, NASA Human Research Program risk pages. Full references are in the project documentation. || إرشادات الإسعاف الأولي IFRC 2020، مقياس NEWS2 (أداة أرضية)، اختبار PVT-B المستخدم عند ناسا، وصفحات مخاطر برنامج الأبحاث البشرية في ناسا. المراجع الكاملة في وثائق المشروع.') }}</p>
+    <p><b>{{ _('Privacy || الخصوصية') }}:</b> {{ _('Crewmates only see ready, needs rest, or not available. Reasons are visible to the person and the flight surgeon only. The team index shows counts without names. || الزملاء يرون فقط: جاهز، يحتاج راحة، أو غير متاح. الأسباب يراها صاحبها والطبيب الأرضي فقط. مؤشر الفريق أعداد بلا أسماء.') }}</p>
+    <p class="small muted">{{ _('Decisions inside the system are clear written rules, not a trained model. Assistance from generative tools in writing code and summarising sources is disclosed in the project page. || القرار داخل النظام قواعد مكتوبة واضحة وليس نموذجاً مدرَّباً. المساعدة من الأدوات التوليدية في كتابة الكود وتلخيص المصادر مذكورة في صفحة المشروع.') }}</p>
+  </div>
+</dialog>
+<script src="{{ url_for('static', filename='voice.js') }}"></script>
+<script>(function(){const b=document.getElementById("spk"),T={{ _({'on':'Voice on || الصوت مفعّل','off':'Voice off || الصوت مطفأ','none':'No voice for this language on this device || لا يوجد صوت لهذه اللغة على هذا الجهاز'})|tojson }};
+function paint(){b.textContent=!Voice.speakerOn?T.off:Voice.hasVoice()?T.on:T.none;b.setAttribute("aria-pressed",Voice.speakerOn)}
+b.onclick=()=>{Voice.setSpeaker(!Voice.speakerOn);paint()};paint();document.addEventListener("voices",paint);setTimeout(paint,800)})();</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
