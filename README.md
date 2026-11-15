@@ -11,8 +11,11 @@ Actual AURA-5 dashboard, cropped from the running prototype
 
 Links
 Live application: https://aegis-mind.replit.app/aura5/
+
 Official challenge: https://www.spaceappschallenge.org/2026/challenges/health-monitoring-software/
+
 Project demo (7 slides, PDF): https://drive.google.com/file/d/1sDdz1Hfkb-HKl5f0-tcMw5SYp4E5ZKON/view?usp=sharing
+
 Repository: https://github.com/jenansarhan15-lgtm/AURA-05
 The live app is an existing hosted build and may differ from this standalone packaging copy.
 
